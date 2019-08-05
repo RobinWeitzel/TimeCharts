@@ -1,0 +1,24 @@
+{
+  "name": "timecharts",
+  "version": "1.0.0",
+  "description": "A chart library focusing on visualizing time-related data",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/RobinWeitzel/TimeCharts.git"
+  },
+  "keywords": [
+    "chart",
+    "time",
+    "visualize"
+  ],
+  "author": "Robin Weitzel",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/RobinWeitzel/TimeCharts/issues"
+  },
+  "homepage": "https://github.com/RobinWeitzel/TimeCharts#readme"
+}
