@@ -329,7 +329,7 @@
             const viewboxWidthScale = 100 / realWidth;
             const viewboxHeightScale = realHeight / 100;
             const barCount = this.data.datasets.reduce((p, c) => Math.max(p, c.values.length), 0);
-            const textWidth = this.data.labels.reduce((p, c) => Math.max(p, c.length > 0 ? 1 + c.length * 0.5 : 0), 0);
+            const textWidth = this.data.labels.reduce((p, c) => Math.max(p, c.length > 0 ? (1 + c.length * 7.5) * viewboxWidthScale : 0), 0); // 7.5 per char 
             const barWidth = 100 - textWidth;
             const barHeight = 11;
             const barSpacing = (100 * viewboxHeightScale) / barCount - barHeight;
