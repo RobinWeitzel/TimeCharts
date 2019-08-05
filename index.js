@@ -245,6 +245,9 @@
             }
         }
 
+        /**
+         * Draws a vertical chart
+         */
         drawVertical() {
             const realWidth = document.querySelector("#container").clientWidth;
             const realHeight = document.querySelector("#container").clientHeight;
@@ -323,6 +326,9 @@
             this.container.appendChild(this.svg);
         }
 
+        /**
+         * Draws a horizontal chart
+         */
         drawHorizontal() {
             const realWidth = document.querySelector("#container").clientWidth;
             const realHeight = document.querySelector("#container").clientHeight;
@@ -403,6 +409,13 @@
             this.container.appendChild(this.svg);
         }
 
+        /**
+         * Draws a tooltip at the horizontal center of the element
+         * @param {bool} show Whether to show or hide the tooltip
+         * @param {object} g the element on which the tooltip is centered
+         * @param {number|string} value the value of the element
+         * @param {number|string} title the title of the element
+         */
         showTooltip(show, g, value, title) {
             if (this.tooltip === undefined) {
                 this.tooltip = document.createElement('div');
