@@ -50,13 +50,13 @@
          */
         static svg(width, height, vbWidth, vbHeight, options) {
             const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg")
-            svg.setAttributes({
+            setAttributes(svg, {
                 width,
                 height,
                 viewBox: "0 0 " + vbWidth + " " + vbHeight,
                 preserveAspectRatio: "none"
             });
-            svg.setAttributes(options || {});
+            setAttributes(svg, options || {});
             return svg;
         }
 
@@ -73,14 +73,14 @@
          */
         static rect(x, y, width, height, color, options) {
             const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect")
-            rect.setAttributes({
+            setAttributes(rect, {
                 width,
                 height,
                 x,
                 y,
                 fill: color
             });
-            rect.setAttributes(options || {});
+            setAttributes(rect, options || {});
             return rect;
         }
 
@@ -98,7 +98,7 @@
          */
         static line(x1, y1, x2, y2, color, width, options) {
             const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-            line.setAttributes({
+            setAttributes(line, {
                 x1,
                 y1,
                 x2,
@@ -106,7 +106,7 @@
                 stroke: color,
                 "stroke-width": width
             });
-            line.setAttributes(options || {});
+            setAttributes(line, options || {});
             return line;
         }
 
@@ -120,11 +120,11 @@
          */
         static path(shape, color, options) {
             const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-            path.setAttributes({
+            setAttributes(path, {
                 d: shape,
                 fill: color
             });
-            path.setAttributes(options || {});
+            setAttributes(path, options || {});
             return path;
         }
 
@@ -141,7 +141,7 @@
         static text(x, y, content, color, options) {
             color = color || "black";
             const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
-            text.setAttributes({
+            setAttributes(text, {
                 x,
                 y,
                 "font-size": "14px",
@@ -151,7 +151,7 @@
                 "text-anchor": "middle",
                 class: ["static"]
             });
-            text.setAttributes(options || {});
+            setAttributes(text, options || {});
             text.appendChild(document.createTextNode(content))
             return text;
         }
@@ -168,7 +168,53 @@
     ///// PUBLIC FUNCTIONS /////
     class Barchart {
         constructor(element, params) {
-            console.log("test");
+            this.container = document.querySelector(element);
+            if (this.container == null) {
+                console.error("Container for chart does not exist");
+                return;
+            }
+
+            this.draw();
+            window.addEventListener('resize', () => {
+                this.draw();
+            });
+        }
+
+        draw() {
+            /* 
+            Thoughts about size
+            
+            real width: defined by user via container
+            real height: defined by user via container
+            svg width: fixed to 100%
+            svg height: fixed to 100%
+            viewbox width: depends on real width
+            viewbox height: fixed to 100px with container at 100px
+            bar width: fixed to 10px with viewbox and container at 100px
+            bar height: fixed to 70px with viewbox and container at 100px
+            bar spacing: depends on real width and number of bars
+            text height: fixed to 15px with viewbox and container at 100px
+            */
+            const realWidth = document.querySelector("#container").clientWidth;
+            const realHeight = document.querySelector("#container").clientHeight;
+            const numberOfBars = 5;
+            const viewboxWidthScale = realWidth / 100;
+            const viewboxHeightScale = 100 / realHeight;
+            const barSpacing = (100 * viewboxWidthScale) / numberOfBars - 10;
+
+            this.svg = Draw.svg("100%", "100%", 100 * viewboxWidthScale, 100);
+
+            for (let i = 0; i < numberOfBars; i++) {
+                const rect = Draw.rect((i + 0.5) * barSpacing + i * 10, 0, 10, 70, "black");
+                this.svg.appendChild(rect);
+
+                const text = Draw.text((i + 0.5) * barSpacing + i * 10 + 5, 70 + (20 * viewboxHeightScale), "test", "black");
+                text.setAttribute("transform", `scale(1,${viewboxHeightScale}) translate(0, ${parseFloat(text.getAttribute("y")) / viewboxHeightScale - parseFloat(text.getAttribute("y"))})`);
+                this.svg.appendChild(text);
+            }
+
+            clear(this.container);
+            this.container.appendChild(this.svg);
         }
     }
 

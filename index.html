@@ -6,11 +6,19 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>TimeCharts</title>
     <script src="./index.js" type="text/javascript"></script>
+    <style>
+        body {
+            margin: 0px;
+        }
+    </style>
 </head>
 <body>
-    
+    <div id="container" style="width: 100vw; height: 40vh;"></div>
+
     <script>
-        const test = new TimeCharts.Barchart();    
+        const test = new TimeCharts.Barchart("#container", {
+
+        });    
     </script>
 </body>
 </html>
