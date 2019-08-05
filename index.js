@@ -201,6 +201,7 @@
      * @param {number|string} params.padding.right right padding for the chart
      * @param {number|string} params.padding.bottom bottom padding for the chart
      * @param {number|string} params.padding.left left padding for the chart
+     * @param {string} params.orientation (optional) orientation for the chart, possible values: (vertical), horizontal
      */
     class Barchart {
         constructor(element, params) {
@@ -222,34 +223,29 @@
                     bottom: 0,
                     left: 0
                 },
-                colors: ['#7cd6fd', '#5e64ff', '#743ee2', '#ff5858', '#ffa00a', '#feef72', '#28a745', '#98d85b', '#b554ff', '#ffa3ef', '#36114C', '#bdd3e6', '#f0f4f7', '#b8c2cc']
+                colors: ['#7cd6fd', '#5e64ff', '#743ee2', '#ff5858', '#ffa00a', '#feef72', '#28a745', '#98d85b', '#b554ff', '#ffa3ef', '#36114C', '#bdd3e6', '#f0f4f7', '#b8c2cc'],
+                orientation: "vertical"
             });
 
             this.data = params.data;
             this.padding = params.padding;
             this.colors = params.colors;
+            this.orientation = params.orientation;            
 
-            this.draw();
-            window.addEventListener('resize', () => {
-                this.draw();
-            });
+            if(this.orientation !== "horizontal") {
+                this.drawVertical();
+                window.addEventListener('resize', () => {
+                    this.drawVertical();
+                });
+            } else {
+                this.drawHorizontal();
+                window.addEventListener('resize', () => {
+                    this.drawHorizontal();
+                });
+            }
         }
 
-        draw() {
-            /* 
-            Thoughts about size
-            
-            real width: defined by user via container
-            real height: defined by user via container
-            svg width: fixed to 100%
-            svg height: fixed to 100%
-            viewbox width: depends on real width
-            viewbox height: fixed to 100px with container at 100px
-            bar width: fixed to 11px with viewbox and container at 100px
-            bar height: fixed to 70px with viewbox and container at 100px
-            bar spacing: depends on real width and number of bars
-            text height: fixed to 15px with viewbox and container at 100px
-            */
+        drawVertical() {
             const realWidth = document.querySelector("#container").clientWidth;
             const realHeight = document.querySelector("#container").clientHeight;
             const viewboxWidthScale = realWidth / 100;
@@ -270,11 +266,6 @@
             for (let i = 0; i < barCount; i++) {
                 const label = this.data.labels[i] || "";
 
-                /*const background = Draw.rect((i + 0.5) * barSpacing + i * barWidth, 0, barWidth, 70, "#E3E6E9", {
-                    "rx": 6,
-                    "ry": 6 * viewboxHeightScale
-                });*/
-
                 const rx = barWidth / 2;
                 const ry = 7.5 * viewboxHeightScale;
 
@@ -288,36 +279,39 @@
 
                 for(let j = 0; j < this.data.datasets.length; j++) {
                     const value = this.data.datasets[j].values[i] || 0;
+                    const title = this.data.datasets[j].titles ? this.data.datasets[j].titles[i] || "" : "";
 
                     let foreground;
                     if(this.data.datasets.length === 1) { // single element
                         foreground = Draw.path(
-                            `M ${(i + 0.5) * barSpacing + i * barWidth},${0} m 0, ${(70 - y) - ry} a ${rx},${ry} 0 0 0 ${barWidth},0 v ${ry*2 - (70 * value)} a ${rx},${ry} 0 0 0 ${-barWidth},0 z`,
+                            `M ${(i + 0.5) * barSpacing + i * barWidth},${(70 - y) - ry} a ${rx},${ry} 0 0 0 ${barWidth},0 v ${ry*2 - (70 * value)} a ${rx},${ry} 0 0 0 ${-barWidth},0 z`,
                             this.colors[j % this.colors.length]
                         );
                     } else if(y === 0) { // First element
                         foreground = Draw.path(
-                            `M ${(i + 0.5) * barSpacing + i * barWidth},${0} m 0, ${(70 - y) - ry} a ${rx},${ry} 0 0 0 ${barWidth},0 v ${ry - (70 * value)} h ${-barWidth} z`,
+                            `M ${(i + 0.5) * barSpacing + i * barWidth},${(70 - y) - ry} a ${rx},${ry} 0 0 0 ${barWidth},0 v ${ry - (70 * value)} h ${-barWidth} z`,
                             this.colors[j % this.colors.length]
                         );
                     } else if(y + 70 * value === 70 || j === this.data.datasets.length - 1) { // Last element
                         foreground = Draw.path(
-                            `M ${(i + 0.5) * barSpacing + i * barWidth},${0} m 0, ${(70 - y)} h ${barWidth} v ${ry - (70 * value)} a ${rx},${ry} 0 0 0 ${-barWidth},0 z`,
+                            `M ${(i + 0.5) * barSpacing + i * barWidth},${70 - y} h ${barWidth} v ${ry - (70 * value)} a ${rx},${ry} 0 0 0 ${-barWidth},0 z`,
                             this.colors[j % this.colors.length]
                         );
                     } else { // element in the middle
                         foreground = Draw.path(
-                            `M ${(i + 0.5) * barSpacing + i * barWidth},${0} m 0, ${70 - y} h ${barWidth} v ${-70 * value} h ${-barWidth} z`,
+                            `M ${(i + 0.5) * barSpacing + i * barWidth},${70 - y} h ${barWidth} v ${-70 * value} h ${-barWidth} z`,
                             this.colors[j % this.colors.length]
                         );
                     }
+
+                    foreground.addEventListener('mouseenter', evt => { this.showTooltip(true, foreground, value, title) });
+                    foreground.addEventListener("mouseleave", evt => { this.showTooltip(false) });
 
                     if(y < 70) { // only draw the part if it would not overshoot
                         this.svg.appendChild(foreground);     
                     }
 
                     y = y + 70 * value;
-    
                 }
 
                 const text = Draw.text((i + 0.5) * (barSpacing + barWidth), 70 + (20 * viewboxHeightScale), label, "black");
@@ -328,8 +322,110 @@
             clear(this.container);
             this.container.appendChild(this.svg);
         }
-    }
 
+        drawHorizontal() {
+            const realWidth = document.querySelector("#container").clientWidth;
+            const realHeight = document.querySelector("#container").clientHeight;
+            const viewboxWidthScale = 100 / realWidth;
+            const viewboxHeightScale = realHeight / 100;
+            const barCount = this.data.datasets.reduce((p, c) => Math.max(p, c.values.length), 0);
+            const textWidth = this.data.labels.reduce((p, c) => Math.max(p, c.length > 0 ? 1 + c.length * 0.5 : 0), 0);
+            const barWidth = 100 - textWidth;
+            const barHeight = 11;
+            const barSpacing = (100 * viewboxHeightScale) / barCount - barHeight;
+
+            this.svg = Draw.svg("100%", "100%", 100, 100 * viewboxHeightScale);
+
+            // Padding
+            this.svg.style.paddingTop = this.padding.top;
+            this.svg.style.paddingRight = this.padding.right;
+            this.svg.style.paddingBottom = this.padding.bottom;
+            this.svg.style.paddingLeft = this.padding.left;
+
+            // Draw data
+            for (let i = 0; i < barCount; i++) {
+                const label = this.data.labels[i] || "";
+
+                const rx = 7.5 * viewboxWidthScale;
+                const ry = barHeight / 2;
+
+                const background = Draw.path(
+                    `M ${textWidth + rx}, ${(i + 0.5) * barSpacing + i * barHeight} a ${rx},${ry} 0 0 0 0,${barHeight} h ${barWidth - rx*2} a ${rx},${ry} 0 0 0 0,${-barHeight} z`,
+                    "#E3E6E9"
+                );
+                this.svg.appendChild(background);
+
+                let x = 0; // width of the bar. Contains the position at which to draw the next rectangle
+
+                for(let j = 0; j < this.data.datasets.length; j++) {
+                    const value = this.data.datasets[j].values[i] || 0;
+                    const title = this.data.datasets[j].titles ? this.data.datasets[j].titles[i] || "" : "";
+
+                    let foreground;
+                    if(this.data.datasets.length === 1) { // single element
+                        foreground = Draw.path(
+                            `M ${textWidth + x + rx},${(i + 0.5) * barSpacing + i * barHeight} a ${rx},${ry} 0 0 0 0,${barHeight} h ${(barWidth * value) - rx*2} a ${rx},${ry} 0 0 0 0,${-barHeight} z`,
+                            this.colors[j % this.colors.length]
+                        );
+                    } else if(x === 0) { // First element
+                        foreground = Draw.path(
+                            `M ${textWidth + x + rx},${(i + 0.5) * barSpacing + i * barHeight} a ${rx},${ry} 0 0 0 0,${barHeight} h ${(barWidth * value) - rx} v ${-barHeight} z`,
+                            this.colors[j % this.colors.length]
+                        );
+                    } else if(x + barWidth * value === barWidth || j === this.data.datasets.length - 1) { // Last element
+                        foreground = Draw.path(
+                            `M ${textWidth + x},${(i + 0.5) * barSpacing + i * barHeight} v ${barHeight} h ${(barWidth * value) - rx} a ${rx},${ry} 0 0 0 0,${-barHeight} z`,
+                            this.colors[j % this.colors.length]
+                        );
+                    } else { // element in the middle
+                        foreground = Draw.path(
+                            `M ${textWidth + x}, ${(i + 0.5) * barSpacing + i * barHeight} v ${barHeight} h ${barWidth * value} v ${-barHeight} z`,
+                            this.colors[j % this.colors.length]
+                        );
+                    }
+
+                    foreground.addEventListener('mouseenter', evt => { this.showTooltip(true, foreground, value, title) });
+                    foreground.addEventListener("mouseleave", evt => { this.showTooltip(false) });
+
+                    if(x < barWidth) { // only draw the part if it would not overshoot
+                        this.svg.appendChild(foreground);     
+                    }
+
+                    x = x + barWidth * value;
+                }
+
+                const text = Draw.text(0, (i + 0.5) * (barSpacing + barHeight), label, "black", {"text-anchor": "start", "alignment-baseline": "central"});
+                text.setAttribute("transform", `scale(${viewboxWidthScale},1) translate(${parseFloat(text.getAttribute("x")) / viewboxWidthScale - parseFloat(text.getAttribute("x"))}, 0)`);
+                this.svg.appendChild(text);
+            }
+
+            clear(this.container);
+            this.container.appendChild(this.svg);
+        }
+
+        showTooltip(show, g, value, title) {
+            if (this.tooltip === undefined) {
+                this.tooltip = document.createElement('div');
+                this.tooltip.style.display = "block";
+                this.tooltip.style.position = "absolute";
+                this.tooltip.classList.add('time-chart-tooltip');
+                this.tooltip.appendChild(document.createElement('span'));
+                this.container.appendChild(this.tooltip);
+            }
+    
+            if (!show) {
+                this.tooltip.style.display = "none";
+                return;
+            }
+    
+            this.tooltip.style.top = g.getBoundingClientRect().y - 40 + "px";
+            this.tooltip.style.webkitTransform = `translate3d(calc(${g.getBoundingClientRect().x + g.getBoundingClientRect().width / 2}px - 50%), calc(0px), 0)`;
+            clear(this.tooltip);
+            this.tooltip.innerHTML = `<span style="color: gray">${value}</span>${title !== "" ? ": " + title : ""}`;
+            this.tooltip.style.display = "block";
+        }
+    }
+ 
     // attach properties to the exports object to define
     // the exported module properties.
     exports.Barchart = Barchart;
