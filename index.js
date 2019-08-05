@@ -251,7 +251,7 @@
             const viewboxWidthScale = realWidth / 100;
             const viewboxHeightScale = 100 / realHeight;
             const barCount = this.data.datasets.reduce((p, c) => Math.max(p, c.values.length), 0);
-            const barWidth = 11;
+            const barWidth = 20;
             const barSpacing = (100 * viewboxWidthScale) / barCount - barWidth;
 
             this.svg = Draw.svg("100%", "100%", 100 * viewboxWidthScale, 100);
@@ -267,7 +267,7 @@
                 const label = this.data.labels[i] || "";
 
                 const rx = barWidth / 2;
-                const ry = 7.5 * viewboxHeightScale;
+                const ry = barWidth / 2 * viewboxHeightScale;
 
                 const background = Draw.path(
                     `M ${(i + 0.5) * barSpacing + i * barWidth},${0} m 0, ${70 - ry} a ${rx},${ry} 0 0 0 ${barWidth},0 v ${ry*2 - 70} a ${rx},${ry} 0 0 0 ${-barWidth},0 z`,
@@ -331,7 +331,7 @@
             const barCount = this.data.datasets.reduce((p, c) => Math.max(p, c.values.length), 0);
             const textWidth = this.data.labels.reduce((p, c) => Math.max(p, c.length > 0 ? (1 + c.length * 7.5) * viewboxWidthScale : 0), 0); // 7.5 per char 
             const barWidth = 100 - textWidth;
-            const barHeight = 11;
+            const barHeight = 20;
             const barSpacing = (100 * viewboxHeightScale) / barCount - barHeight;
 
             this.svg = Draw.svg("100%", "100%", 100, 100 * viewboxHeightScale);
@@ -346,7 +346,7 @@
             for (let i = 0; i < barCount; i++) {
                 const label = this.data.labels[i] || "";
 
-                const rx = 7.5 * viewboxWidthScale;
+                const rx = barHeight / 2 * viewboxWidthScale;
                 const ry = barHeight / 2;
 
                 const background = Draw.path(
