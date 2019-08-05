@@ -37,6 +37,27 @@
         }
     }
 
+
+    /**
+     * Merges an object into another one
+     * @param {object} obj the object into which to merge 
+     * @param {object} merger the object to merge 
+     * @param {bool} overwrite (optional) whether to overwrite the original value of it exists, default is false
+     */
+    function mergeObjects(obj, merger, overwrite) {
+        overwrite = overwrite === true; // defaults to false
+
+        for (let key of Object.keys(merger)) {
+            if (!(key in obj)) {
+                obj[key] = merger[key];
+            } else if (typeof merger[key] === "object") {
+                mergeObjects(obj[key], merger[key], overwrite);
+            } else if(overwrite) {
+                obj[key] = merger[key];
+            }
+        }
+    }
+
     class Draw {
         /**
          * Creates an svg
@@ -166,6 +187,21 @@
     }
 
     ///// PUBLIC FUNCTIONS /////
+
+    /**
+     * A basic bar chart
+     * 
+     * @param {string} element css query selector of the container dom element into which the chart is placed
+     * @param {object} params Options
+     * @param {array} params.data the data to be displayed
+     * @param {number} params.data[].value the value for the bar. should be between 0 and 1
+     * @param {string} params.data[].title the text to be displayed underneath the bar
+     * @param {object} params.padding padding in all directions of the chart
+     * @param {number|string} params.padding.top top padding for the chart
+     * @param {number|string} params.padding.right right padding for the chart
+     * @param {number|string} params.padding.bottom bottom padding for the chart
+     * @param {number|string} params.padding.left left padding for the chart
+     */
     class Barchart {
         constructor(element, params) {
             this.container = document.querySelector(element);
@@ -173,6 +209,25 @@
                 console.error("Container for chart does not exist");
                 return;
             }
+
+            // Extract parameters and sets defaults if parameters not available
+            mergeObjects(params, {
+                data: {
+                    labels: [],
+                    datasets: []
+                },
+                padding: {
+                    top: 0,
+                    right: 0,
+                    bottom: 0,
+                    left: 0
+                },
+                colors: ['#7cd6fd', '#5e64ff', '#743ee2', '#ff5858', '#ffa00a', '#feef72', '#28a745', '#98d85b', '#b554ff', '#ffa3ef', '#36114C', '#bdd3e6', '#f0f4f7', '#b8c2cc']
+            });
+
+            this.data = params.data;
+            this.padding = params.padding;
+            this.colors = params.colors;
 
             this.draw();
             window.addEventListener('resize', () => {
@@ -190,25 +245,82 @@
             svg height: fixed to 100%
             viewbox width: depends on real width
             viewbox height: fixed to 100px with container at 100px
-            bar width: fixed to 10px with viewbox and container at 100px
+            bar width: fixed to 11px with viewbox and container at 100px
             bar height: fixed to 70px with viewbox and container at 100px
             bar spacing: depends on real width and number of bars
             text height: fixed to 15px with viewbox and container at 100px
             */
             const realWidth = document.querySelector("#container").clientWidth;
             const realHeight = document.querySelector("#container").clientHeight;
-            const numberOfBars = 5;
             const viewboxWidthScale = realWidth / 100;
             const viewboxHeightScale = 100 / realHeight;
-            const barSpacing = (100 * viewboxWidthScale) / numberOfBars - 10;
+            const barCount = this.data.datasets.reduce((p, c) => Math.max(p, c.values.length), 0);
+            const barWidth = 11;
+            const barSpacing = (100 * viewboxWidthScale) / barCount - barWidth;
 
             this.svg = Draw.svg("100%", "100%", 100 * viewboxWidthScale, 100);
 
-            for (let i = 0; i < numberOfBars; i++) {
-                const rect = Draw.rect((i + 0.5) * barSpacing + i * 10, 0, 10, 70, "black");
-                this.svg.appendChild(rect);
+            // Padding
+            this.svg.style.paddingTop = this.padding.top;
+            this.svg.style.paddingRight = this.padding.right;
+            this.svg.style.paddingBottom = this.padding.bottom;
+            this.svg.style.paddingLeft = this.padding.left;
 
-                const text = Draw.text((i + 0.5) * barSpacing + i * 10 + 5, 70 + (20 * viewboxHeightScale), "test", "black");
+            // Draw data
+            for (let i = 0; i < barCount; i++) {
+                const label = this.data.labels[i] || "";
+
+                /*const background = Draw.rect((i + 0.5) * barSpacing + i * barWidth, 0, barWidth, 70, "#E3E6E9", {
+                    "rx": 6,
+                    "ry": 6 * viewboxHeightScale
+                });*/
+
+                const rx = barWidth / 2;
+                const ry = 7.5 * viewboxHeightScale;
+
+                const background = Draw.path(
+                    `M ${(i + 0.5) * barSpacing + i * barWidth},${0} m 0, ${70 - ry} a ${rx},${ry} 0 0 0 ${barWidth},0 v ${ry*2 - 70} a ${rx},${ry} 0 0 0 ${-barWidth},0 z`,
+                    "#E3E6E9"
+                );
+                this.svg.appendChild(background);
+
+                let y = 0; // height of the bar. Contains the position at which to draw the next rectangle
+
+                for(let j = 0; j < this.data.datasets.length; j++) {
+                    const value = this.data.datasets[j].values[i] || 0;
+
+                    let foreground;
+                    if(this.data.datasets.length === 1) { // single element
+                        foreground = Draw.path(
+                            `M ${(i + 0.5) * barSpacing + i * barWidth},${0} m 0, ${(70 - y) - ry} a ${rx},${ry} 0 0 0 ${barWidth},0 v ${ry*2 - (70 * value)} a ${rx},${ry} 0 0 0 ${-barWidth},0 z`,
+                            this.colors[j % this.colors.length]
+                        );
+                    } else if(y === 0) { // First element
+                        foreground = Draw.path(
+                            `M ${(i + 0.5) * barSpacing + i * barWidth},${0} m 0, ${(70 - y) - ry} a ${rx},${ry} 0 0 0 ${barWidth},0 v ${ry - (70 * value)} h ${-barWidth} z`,
+                            this.colors[j % this.colors.length]
+                        );
+                    } else if(y + 70 * value === 70 || j === this.data.datasets.length - 1) { // Last element
+                        foreground = Draw.path(
+                            `M ${(i + 0.5) * barSpacing + i * barWidth},${0} m 0, ${(70 - y)} h ${barWidth} v ${ry - (70 * value)} a ${rx},${ry} 0 0 0 ${-barWidth},0 z`,
+                            this.colors[j % this.colors.length]
+                        );
+                    } else { // element in the middle
+                        foreground = Draw.path(
+                            `M ${(i + 0.5) * barSpacing + i * barWidth},${0} m 0, ${70 - y} h ${barWidth} v ${-70 * value} h ${-barWidth} z`,
+                            this.colors[j % this.colors.length]
+                        );
+                    }
+
+                    if(y < 70) { // only draw the part if it would not overshoot
+                        this.svg.appendChild(foreground);     
+                    }
+
+                    y = y + 70 * value;
+    
+                }
+
+                const text = Draw.text((i + 0.5) * (barSpacing + barWidth), 70 + (20 * viewboxHeightScale), label, "black");
                 text.setAttribute("transform", `scale(1,${viewboxHeightScale}) translate(0, ${parseFloat(text.getAttribute("y")) / viewboxHeightScale - parseFloat(text.getAttribute("y"))})`);
                 this.svg.appendChild(text);
             }
