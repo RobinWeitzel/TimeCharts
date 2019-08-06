@@ -40,13 +40,13 @@
     <div id="container" style="width: 400px; height: 40vh;"></div>
 
     <script>
-        const test = new TimeCharts.Barchart("#container", {
+        const chart = new TimeCharts.Barchart("#container", {
             data: {
                 labels: ["Work", "Study"],
                 datasets: [
                     {
                         values: [0.25, 0.5],
-                        titles: ["test"]
+                        title: "test"
                     },
                     {
                         values: [0.5, 0.2]

@@ -213,7 +213,7 @@
          * @param {string[]} [params.data.labels] - the labels underneath each bar
          * @param {Object[]} [params.data.datasets] - each dataset represents one "block" of a bar. To create a stacked bar chart have multiple datasets.
          * @param {number[]} [params.data.datasets[].values] - the values for each "block" of a bar. Should be between 0 and 1. 
-         * @param {string[]} [params.data.datasets[].titles] - the titles for each "block" of a bar.
+         * @param {string} [params.data.datasets[].title] - the title for the dataset.
          * @param {Object} [params.padding] - padding in all directions of the chart.
          * @param {number|string} [params.padding.top] - top padding for the chart.
          * @param {number|string} [params.padding.right] - right padding for the chart.
@@ -308,7 +308,7 @@
 
                 for (let j = 0; j < this.data.datasets.length; j++) {
                     const value = this.data.datasets[j].values[i] || 0;
-                    const title = this.data.datasets[j].titles ? this.data.datasets[j].titles[i] || "" : "";
+                    const title = this.data.datasets[j].title || "";
 
                     let foreground;
                     if (this.data.datasets.length === 1) { // single element
@@ -394,7 +394,7 @@
 
                 for (let j = 0; j < this.data.datasets.length; j++) {
                     const value = this.data.datasets[j].values[i] || 0;
-                    const title = this.data.datasets[j].titles ? this.data.datasets[j].titles[i] || "" : "";
+                    const title = this.data.datasets[j].title || "";
 
                     let foreground;
                     if (this.data.datasets.length === 1) { // single element

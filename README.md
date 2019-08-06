@@ -12,6 +12,8 @@
   <a href="#license">License</a>
 </p>
 
+![screenshot](readme/image1.jpeg)
+
 ## Key Features
 
 * No dependencies
@@ -25,6 +27,36 @@ Just download the library and load it above your JavaScript code.
 ```html
 <script src="TimeCharts.js"></script>
 ```
+
+### Usage
+
+```js
+const chart = new TimeCharts.Barchart("#container", {
+  data: {
+    labels: ["Work", "Study"],
+    datasets: [
+        {
+            values: [0.25, 0.5],
+            title: "test"
+        },
+        {
+            values: [0.5, 0.2]
+        },
+        {
+            values: [0.25, 0.1]
+        },
+    ],
+  },
+  orientation: "horizontal",
+  padding: {
+      top: 50, 
+      left: 50,
+      right: 50
+  }
+});    
+```
+
+The full documentation can be found [here](https://robinweitzel.github.io/TimeCharts/).
 
 ## License
 
