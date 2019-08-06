@@ -17,6 +17,7 @@
 ## Key Features
 
 * No dependencies
+* Fully responsive
 * Easy to use
 
 ## How To Use
@@ -55,6 +56,8 @@ const chart = new TimeCharts.Barchart("#container", {
   }
 });    
 ```
+
+### Documentation
 
 The full documentation can be found [here](https://robinweitzel.github.io/TimeCharts/).
 
