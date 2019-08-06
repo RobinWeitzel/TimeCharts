@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>TimeCharts</title>
+    <link href="https://fonts.googleapis.com/css?family=Roboto&display=swap" rel="stylesheet">
     <script src="./index.js" type="text/javascript"></script>
     <style>
         body {
@@ -37,10 +38,10 @@
     </style>
 </head>
 <body>
-    <div id="container" style="width: 400px; height: 20vh;"></div>
+    <div id="container" style="width: 90vw; height: 130px;"></div>
 
     <script>
-        const chart = new TimeCharts.Barchart("#container", {
+        /*const chart = new TimeCharts.Barchart("#container", {
             data: {
                 labels: ["Work", "Study"],
                 datasets: [
@@ -62,7 +63,62 @@
                 left: 50,
                 right: 50
             }
-        });    
+        });*/
+
+        const chart = new TimeCharts.Timeline("#container", {
+            scale: {
+                from: 7 * 60,
+                to: 19 * 60,
+                intervalStart: 0
+            },
+            data: {
+                timelines: [
+                    {
+                        label: "WORK",
+                        colors: ["#7cd6fd", "#5e64ff"],
+                        values: [{
+                            start: 8 * 60,
+                            length: 120,
+                            title: "Project 1"
+                        },
+                        {
+                            start: 11 * 60,
+                            length: 45,
+                            title: "Project 2"
+                        },
+                        {
+                            start: 13 * 60,
+                            length: 120,
+                            title: "Project 1"
+                        }]
+                    },
+                    {
+                        label: "STUDY",
+                        colors: ["#98d85b"],
+                        values: [{
+                            start: 10 * 60,
+                            length: 60,
+                            title: "Topic 1"
+                        },
+                        {
+                            start: 15 * 60,
+                            length: 90,
+                            title: "Topic 1"
+                        },
+                        {
+                            start: 16 * 60 + 45,
+                            length: 90,
+                            title: "Topic 1"
+                        }]
+                    }
+                ],
+            },  
+            padding: {
+                top: 50, 
+                left: 50,
+                right: 50
+            }
+        });
     </script>
 </body>
 </html>

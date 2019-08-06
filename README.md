@@ -12,7 +12,7 @@
   <a href="#license">License</a>
 </p>
 
-![screenshot](readme/image1.PNG)
+![screenshot](readme/image2.PNG)
 
 ## Key Features
 
@@ -32,29 +32,60 @@ Just download the library and load it above your JavaScript code.
 ### Usage
 
 ```js
-const chart = new TimeCharts.Barchart("#container", {
-  data: {
-    labels: ["Work", "Study"],
-    datasets: [
-        {
-            values: [0.25, 0.5],
-            title: "test"
-        },
-        {
-            values: [0.5, 0.2]
-        },
-        {
-            values: [0.25, 0.1]
-        },
-    ],
+const chart = new TimeCharts.Timeline("#container", {
+  scale: {
+      from: 7 * 60,
+      to: 19 * 60,
+      intervalStart: 0
   },
-  orientation: "horizontal",
+  data: {
+      timelines: [
+          {
+              label: "WORK",
+              colors: ["#7cd6fd", "#5e64ff"],
+              values: [{
+                  start: 8 * 60,
+                  length: 120,
+                  title: "Project 1"
+              },
+              {
+                  start: 11 * 60,
+                  length: 45,
+                  title: "Project 2"
+              },
+              {
+                  start: 13 * 60,
+                  length: 120,
+                  title: "Project 1"
+              }]
+          },
+          {
+              label: "STUDY",
+              colors: ["#98d85b"],
+              values: [{
+                  start: 10 * 60,
+                  length: 60,
+                  title: "Topic 1"
+              },
+              {
+                  start: 15 * 60,
+                  length: 90,
+                  title: "Topic 1"
+              },
+              {
+                  start: 16 * 60 + 45,
+                  length: 90,
+                  title: "Topic 1"
+              }]
+          }
+      ],
+  },  
   padding: {
       top: 50, 
       left: 50,
       right: 50
   }
-});    
+});
 ```
 
 ### Documentation
