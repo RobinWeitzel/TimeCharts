@@ -20,5 +20,8 @@
   "bugs": {
     "url": "https://github.com/RobinWeitzel/TimeCharts/issues"
   },
-  "homepage": "https://github.com/RobinWeitzel/TimeCharts#readme"
+  "homepage": "https://github.com/RobinWeitzel/TimeCharts#readme",
+  "devDependencies": {
+    "better-docs": "^1.1.6"
+  }
 }

@@ -1,8 +1,72 @@
-(function (root, factory) {
-    if (typeof define === 'function' && define.amd) {
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    
+    <meta charset="utf-8">
+    <title>JSDoc: index.js</title>
+
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link href="https://fonts.googleapis.com/css?family=Muli:100,400,700|Oswald:300|Inconsolata,700" rel="stylesheet">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
+    <link type="text/css" rel="stylesheet" href="https://jmblog.github.io/color-themes-for-google-code-prettify/themes/tomorrow-night.min.css">
+    <link type="text/css" rel="stylesheet" href="styles/app.min.css">
+</head>
+
+<body>
+    <div id="stickyNavbarOverlay"></div>
+    <div class="top-navbar">
+        <div class="container">
+            <nav class="navbar" role="navigation" aria-label="main navigation">
+                <div class="navbar-brand">
+                    
+                    
+                        <h1 class="navbar-item">Documentation</h1>
+                    
+                    <a id="hamburger" role="button" class="navbar-burger" aria-label="menu" aria-expanded="false">
+                        <span aria-hidden="true"></span>
+                        <span aria-hidden="true"></span>
+                        <span aria-hidden="true"></span>
+                    </a>
+                </div>
+                
+            </nav>
+        </div>
+    </div>
+    <div class="container">
+        <div class="columns">
+            <div class="column is-3" id="sidebarNav">
+                <div class="sidebar">
+                    <nav>
+                        <h2><a href="index.html">Home</a></h2><div class="category"><h3>Modules</h3><ul><li><a href="module-TimeCharts.html">TimeCharts</a></li></ul><h3>Classes</h3><ul><li><a href="module-TimeCharts-Barchart.html">Barchart</a></li></ul></div>
+                    </nav>
+                </div>
+            </div>
+            <div class="column is-9-desktop">
+                <div class="content" id="main-content-wrapper">
+                    <header class="page-title">
+                        <p>Source</p>
+                        <h1>index.js</h1>
+                    </header>
+                    
+                    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>(function (root, factory) {
+    if (typeof define === 'function' &amp;&amp; define.amd) {
         // AMD. Register as an anonymous module.
         define(['exports'], factory);
-    } else if (typeof exports === 'object' && typeof exports.nodeName !== 'string') {
+    } else if (typeof exports === 'object' &amp;&amp; typeof exports.nodeName !== 'string') {
         // CommonJS
         factory(exports);
     } else {
@@ -292,7 +356,7 @@
             this.svg.style.paddingLeft = this.padding.left;
 
             // Draw data
-            for (let i = 0; i < barCount; i++) {
+            for (let i = 0; i &lt; barCount; i++) {
                 const label = this.data.labels[i] || "";
 
                 const rx = barWidth / 2;
@@ -306,7 +370,7 @@
 
                 let y = 0; // height of the bar. Contains the position at which to draw the next rectangle
 
-                for (let j = 0; j < this.data.datasets.length; j++) {
+                for (let j = 0; j &lt; this.data.datasets.length; j++) {
                     const value = this.data.datasets[j].values[i] || 0;
                     const title = this.data.datasets[j].titles ? this.data.datasets[j].titles[i] || "" : "";
 
@@ -338,7 +402,7 @@
                         foreground.addEventListener("mouseleave", evt => { this.showTooltip(false) });
                     }
 
-                    if (y < 70) { // only draw the part if it would not overshoot
+                    if (y &lt; 70) { // only draw the part if it would not overshoot
                         this.svg.appendChild(foreground);
                     }
 
@@ -378,7 +442,7 @@
             this.svg.style.paddingLeft = this.padding.left;
 
             // Draw data
-            for (let i = 0; i < barCount; i++) {
+            for (let i = 0; i &lt; barCount; i++) {
                 const label = this.data.labels[i] || "";
 
                 const rx = barHeight / 2 * viewboxWidthScale;
@@ -392,7 +456,7 @@
 
                 let x = 0; // width of the bar. Contains the position at which to draw the next rectangle
 
-                for (let j = 0; j < this.data.datasets.length; j++) {
+                for (let j = 0; j &lt; this.data.datasets.length; j++) {
                     const value = this.data.datasets[j].values[i] || 0;
                     const title = this.data.datasets[j].titles ? this.data.datasets[j].titles[i] || "" : "";
 
@@ -424,7 +488,7 @@
                         foreground.addEventListener("mouseleave", evt => { this.showTooltip(false) });
                     }
 
-                    if (x < barWidth) { // only draw the part if it would not overshoot
+                    if (x &lt; barWidth) { // only draw the part if it would not overshoot
                         this.svg.appendChild(foreground);
                     }
 
@@ -467,7 +531,7 @@
             this.tooltip.style.top = g.getBoundingClientRect().y - 40 + "px";
             this.tooltip.style.webkitTransform = `translate3d(calc(${g.getBoundingClientRect().x + g.getBoundingClientRect().width / 2}px - 50%), calc(0px), 0)`;
             clear(this.tooltip);
-            this.tooltip.innerHTML = `<span style="color: gray">${value}</span>${title !== "" ? ": " + title : ""}`;
+            this.tooltip.innerHTML = `&lt;span style="color: gray">${value}&lt;/span>${title !== "" ? ": " + title : ""}`;
             this.tooltip.style.display = "block";
         }
     }
@@ -475,4 +539,30 @@
     // attach properties to the exports object to define
     // the exported module properties.
     exports.Barchart = Barchart;
-}));
+}));</code></pre>
+        </article>
+    </section>
+
+
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+<footer class="footer">
+    <div class="content has-text-centered">
+        <p>Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.3</a> on Tue Aug 06 2019 08:33:48 GMT+0200 (GMT+02:00)</p>
+        <p class="sidebar-created-by">
+            <a href="https://github.com/SoftwareBrothers/better-docs" target="_blank">BetterDocs theme</a> provided with <i class="fas fa-heart"></i> by 
+            <a href="http://softwarebrothers.co" target="_blank">SoftwareBrothers</a>
+        </p>
+    </div>
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/app.min.js"></script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
