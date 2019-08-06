@@ -660,7 +660,7 @@
                 }
 
                 // Draw label
-                const text = Draw.text(0.5 * textWidth1, scaleHeight + (i + 0.5) * (lineSpacing + lineHeight), label, "black", this.font, { "text-anchor": "middle", "alignment-baseline": "central" });
+                const text = Draw.text(0.5 * textWidth1, scaleHeight + (i + 0.5) * (lineSpacing + lineHeight), label, "black", this.font, { "text-anchor": "middle", "alignment-baseline": "central", "font-weight": "bold" });
                 text.setAttribute("transform", `scale(${viewboxWidthScale},1) translate(${parseFloat(text.getAttribute("x")) / viewboxWidthScale - parseFloat(text.getAttribute("x"))}, 0)`);
                 this.svg.appendChild(text);
 
