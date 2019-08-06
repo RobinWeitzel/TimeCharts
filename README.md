@@ -12,7 +12,7 @@
   <a href="#license">License</a>
 </p>
 
-![screenshot](readme/image1.jpeg)
+![screenshot](readme/image1.PNG)
 
 ## Key Features
 
