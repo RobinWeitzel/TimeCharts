@@ -1,10 +1,15 @@
 {
   "name": "timecharts",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "A chart library focusing on visualizing time-related data",
-  "main": "index.js",
+  "main": "dist/TimeCharts.js",
+  "unpkg": "dist/TimeCharts.min.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "webpack --mode production",
+    "dev": "webpack --mode development"
+  },
+  "engines": {
+    "node": ">=7.8.0"
   },
   "repository": {
     "type": "git",
@@ -22,6 +27,18 @@
   },
   "homepage": "https://github.com/RobinWeitzel/TimeCharts#readme",
   "devDependencies": {
-    "better-docs": "^1.1.6"
-  }
+    "@babel/cli": "^7.5.5",
+    "@babel/core": "^7.5.5",
+    "@babel/preset-env": "^7.5.5",
+    "babel-loader": "^8.0.6",
+    "babel-preset-minify": "^0.5.0",
+    "better-docs": "^1.1.6",
+    "css-loader": "^3.2.0",
+    "style-loader": "^1.0.0",
+    "webpack": "^4.39.1",
+    "webpack-cli": "^3.3.6"
+  },
+  "files": [
+    "dist"
+  ]
 }
