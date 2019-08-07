@@ -26,7 +26,8 @@
 Just download the library and load it above your JavaScript code.
 
 ```html
-<script src="TimeCharts.js"></script>
+<link rel="stylesheet" type="text/css" href="./TimeCharts.css">
+<script src="./TimeCharts.js" type="text/javascript"></script>
 ```
 
 ### Usage
