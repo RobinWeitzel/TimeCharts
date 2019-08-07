@@ -23,6 +23,15 @@
 ## How To Use
 
 ### Installation
+
+#### Via NPM
+Simply install the library
+
+```
+npm i timecharts
+```
+
+#### In the Browser
 [Download](https://github.com/RobinWeitzel/TimeCharts/releases/download/v1.0.0/TimeCharts.zip) the library and load it above your JavaScript code.
 
 ```html
