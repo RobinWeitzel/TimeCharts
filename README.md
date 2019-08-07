@@ -23,7 +23,7 @@
 ## How To Use
 
 ### Installation
-Just download the library and load it above your JavaScript code.
+[Download](https://github.com/RobinWeitzel/TimeCharts/releases/download/v1.0.0/TimeCharts.zip) the library and load it above your JavaScript code.
 
 ```html
 <link rel="stylesheet" type="text/css" href="./TimeCharts.css">
