@@ -17,7 +17,7 @@
     <div id="container" style="width: 50vw; height: 50vh;"></div>
 
     <script>
-        const chart = new TimeCharts.Barchart("#container", {
+        /*const chart = new TimeCharts.Barchart("#container", {
             data: {
                 labels: ["Work", "Study"],
                 datasets: [
@@ -39,11 +39,11 @@
                 left: 50,
                 right: 50,
                 bottom:50
-            },
-            distance: 20
-        });
+            }
 
-        /*const chart = new TimeCharts.Timeline("#container", {
+        });*/
+
+        const chart = new TimeCharts.Timeline("#container", {
             scale: {
                 from: 7 * 60,
                 to: 19 * 60,
@@ -97,9 +97,8 @@
                 right: 50,
                 bottom: 50
             },
-            distance: 20,
-            legendDistance: 20
-        });*/
+            legendDistance: 20,
+        });
     </script>
 </body>
 </html>

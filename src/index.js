@@ -215,6 +215,7 @@ class Barchart {
      * @param {string} [params.font = 'Roboto'] - the font for all writing. Font must be imported separately.
      * @param {boolean} [params.hover = true] - whether the titles should be shown on hover or not.
      * @param {'variable' | number} [params.distance = 'variable'] - whether the distance between timelines should be variable (based on svg size) or a fixed number of px.
+     * @param {boolean} [params.adjustSize = false] - whether the size of the container should be adjusted based on the needed space. Only works if params.distance != 'variable'.
      * @throws Will throw an error if the container element is not found.
      */
     constructor(element, params) {
@@ -241,7 +242,8 @@ class Barchart {
             font: "Roboto",
             hover: true,
             barSize: 25,
-            distance: 'variable'
+            distance: 'variable',
+            adjustSize: false
         });
 
         this.data = params.data;
@@ -252,6 +254,7 @@ class Barchart {
         this.hover = params.hover;
         this.barSize = params.barSize;
         this.distance = params.distance;
+        this.adjustSize = this.distance !== 'variable' && params.adjustSize;
 
         if (this.orientation !== "horizontal") {
             this.drawVertical();
@@ -271,15 +274,21 @@ class Barchart {
      * @private
      */
     drawVertical() {
-        const realWidth = this.container.clientWidth - this.padding.right - this.padding.left;
         const realHeight = this.container.clientHeight - this.padding.top - this.padding.bottom;
-        const viewboxWidthScale = realWidth / 100;
         const viewboxHeightScale = 100 / realHeight;
         const barCount = this.data.datasets.reduce((p, c) => Math.max(p, c.values.length), 0);
         const barWidth = this.barSize;
         const barHeight = 100 - 25 * viewboxHeightScale;
-        const barSpacing = this.distance === 'variable' ? (100 * viewboxWidthScale) / barCount - barWidth : this.distance;
 
+        if(this.adjustSize) {
+            const width = (barWidth+this.distance) * barCount + this.padding.left + this.padding.right;
+            this.container.style.width = `${width}px`;
+        }
+        
+        const realWidth = this.container.clientWidth - this.padding.right - this.padding.left;
+        const viewboxWidthScale = realWidth / 100;
+        const barSpacing = this.distance === 'variable' ? (100 * viewboxWidthScale) / barCount - barWidth : this.distance;
+        
         this.svg = Draw.svg(`calc(100% - ${this.padding.right + this.padding.left}px)`, `calc(100% - ${this.padding.top + this.padding.bottom}px)`, 100 * viewboxWidthScale, 100);
 
         // Padding
@@ -359,15 +368,21 @@ class Barchart {
      */
     drawHorizontal() {
         const realWidth = this.container.clientWidth - this.padding.right - this.padding.left;
-        const realHeight = this.container.clientHeight - this.padding.top - this.padding.bottom;
         const viewboxWidthScale = 100 / realWidth;
-        const viewboxHeightScale = realHeight / 100;
         const barCount = this.data.datasets.reduce((p, c) => Math.max(p, c.values.length), 0);
         const textWidth = this.data.labels.reduce((p, c) => Math.max(p, c.length > 0 ? (2 + c.length * 7.5) * viewboxWidthScale : 0), 0); // 7.5 per char 
         const barWidth = 100 - textWidth;
         const barHeight = this.barSize;
+        
+        if(this.adjustSize) {
+            const height = (barCount + this.distance) * barHeight + this.padding.top + this.padding.bottom;
+            this.container.style.height = `${height}px`;
+        }
+        
+        const realHeight = this.container.clientHeight - this.padding.top - this.padding.bottom;
+        const viewboxHeightScale = realHeight / 100;
         const barSpacing = this.distance === 'variable' ? (100 * viewboxHeightScale) / barCount - barHeight : this.distance;
-
+        
         this.svg = Draw.svg(`calc(100% - ${this.padding.right + this.padding.left}px)`, `calc(100% - ${this.padding.top + this.padding.bottom}px)`, 100, 100 * viewboxHeightScale);
 
         // Padding
@@ -520,6 +535,7 @@ class Timeline {
      * @param {boolean} [params.legend = true] - whether a legend should be shown underneath the timelines.
      * @param {number} [params.legendDistance = 15] - distance from the last timeline to the legend in px. Always set to 0 if params.legend === false.
      * @param {'variable' | number} [params.distance = 'variable'] - whether the distance between timelines should be variable (based on svg size) or a fixed number of px.
+     * @param {boolean} [params.adjustSize = false] - whether the size of the container should be adjusted based on the needed space. Only works if params.distance != 'variable'.
      * @throws Will throw an error if the container element is not found.
      */
     constructor(element, params) {
@@ -550,7 +566,8 @@ class Timeline {
             hover: true,
             legend: true,
             lineHeight: 25,
-            distance: 'variable'
+            distance: 'variable',
+            adjustSize: false
         });
 
         this.scale = params.scale;
@@ -562,6 +579,7 @@ class Timeline {
         this.legendDistance = params.legendDistance;
         this.lineHeight = params.lineHeight;
         this.distance = params.distance;
+        this.adjustSize = this.distance !== 'variable' && params.adjustSize;
 
         this.draw();
         window.addEventListener('resize', () => {
@@ -575,9 +593,7 @@ class Timeline {
      */
     draw() {
         const realWidth = this.container.clientWidth - this.padding.right - this.padding.left;
-        const realHeight = this.container.clientHeight - this.padding.top - this.padding.bottom;
         const viewboxWidthScale = 100 / realWidth;
-        const viewboxHeightScale = realHeight / 100;
         const lineCount = this.data.timelines.length;
         const textWidth1 = this.data.timelines.reduce((p, c) => Math.max(p, c.label.length > 0 ? (40 + c.label.length * 7.5) * viewboxWidthScale : 0), 0); // 7.5 per char 
         const textWidth2 = this.data.timelines.reduce((p, c) => Math.max(p, c.values.reduce((p, c) => Math.max(p, (10 + this.formatMinutes(c.length).length * 7.5) * viewboxWidthScale), 0)), 0); // 7.5 per char
@@ -588,6 +604,14 @@ class Timeline {
         const lineHeight = this.lineHeight;
         const legendHeight = this.legend ? lineHeight : 0;
         const legendSpacing = this.legend ? this.legendDistance : 0;
+
+        if(this.adjustSize) {
+            const height = scaleHeight + legendHeight + legendSpacing + lineCount * (lineHeight + this.distance) + this.padding.top + this.padding.bottom;
+            this.container.style.height = `${height}px`;
+        }
+
+        const realHeight = this.container.clientHeight - this.padding.top - this.padding.bottom;
+        const viewboxHeightScale = realHeight / 100;
         const lineSpacing = this.distance === 'variable' ? (100 * viewboxHeightScale - scaleHeight - legendHeight - legendSpacing) / lineCount - lineHeight : this.distance;
         const scaleStart = Math.max(0.5 * lineSpacing - scaleHeight, 0);
 
