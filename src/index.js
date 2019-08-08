@@ -562,7 +562,7 @@ class Timeline {
         const textWidth2 = this.data.timelines.reduce((p, c) => Math.max(p, c.values.reduce((p, c) => Math.max(p, (10 + this.formatMinutes(c.length).length * 7.5) * viewboxWidthScale), 0)), 0); // 7.5 per char
         const widthLeft = Math.max(textWidth1 + textWidth2, 20 * viewboxWidthScale);
         const widthRight = 20 * viewboxWidthScale;
-        const scaleHeight = 20;
+        const scaleHeight = 15;
         const lineWidth = 100 - widthLeft - widthRight;
         const lineHeight = this.lineHeight;
         const legendHeight = lineHeight;
@@ -587,7 +587,7 @@ class Timeline {
         const intervalStepsWidth = lineWidth / intervalSteps;
 
         for (let i = 0; i <= intervalSteps; i++) {
-            const text = Draw.text(widthLeft + intervalStart + i * intervalStepsWidth, 0, this.formatMinutes2(from + this.scale.intervalStart + i * interval), "black", this.font, { "text-anchor": "middle", "alignment-baseline": "text-before-edge" });
+            const text = Draw.text(widthLeft + intervalStart + i * intervalStepsWidth, 0.5 * lineSpacing - scaleHeight, this.formatMinutes2(from + this.scale.intervalStart + i * interval), "black", this.font, { "text-anchor": "middle", "alignment-baseline": "text-before-edge" });
             text.setAttribute("transform", `scale(${viewboxWidthScale},1) translate(${parseFloat(text.getAttribute("x")) / viewboxWidthScale - parseFloat(text.getAttribute("x"))}, 0)`);
             this.svg.appendChild(text);
         }
