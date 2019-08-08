@@ -5,7 +5,7 @@
   "main": "dist/TimeCharts.js",
   "unpkg": "dist/TimeCharts.min.js",
   "scripts": {
-    "build": "webpack --mode production",
+    "prod": "webpack --mode production",
     "dev": "webpack --mode development"
   },
   "engines": {
