@@ -476,15 +476,15 @@ class Barchart {
         }
 
         if (!show) {
-            this.tooltip.style.display = "none";
+            this.tooltip.style.visibility = "hidden";
             return;
         }
 
-        this.tooltip.style.top = g.getBoundingClientRect().y - 43 + "px";
-        this.tooltip.style.webkitTransform = `translate3d(calc(${g.getBoundingClientRect().x + g.getBoundingClientRect().width / 2}px - 50%), calc(0px), 0)`;
         clear(this.tooltip);
         this.tooltip.innerHTML = `<span style="color: gray">${value}</span>${title !== "" ? ": " + title : ""}`;
-        this.tooltip.style.display = "block";
+        this.tooltip.style.top = g.getBoundingClientRect().y - 43 + "px";
+        this.tooltip.style.left = `calc(${g.getBoundingClientRect().x + g.getBoundingClientRect().width / 2 - this.tooltip.getBoundingClientRect().width / 2}px)`;
+        this.tooltip.style.visibility = "visible";
     }
 
     /**
@@ -565,6 +565,7 @@ class Timeline {
             font: "Roboto",
             hover: true,
             legend: true,
+            legendDistance: 15,
             lineHeight: 25,
             distance: 'variable',
             adjustSize: false
@@ -800,15 +801,15 @@ class Timeline {
         }
 
         if (!show) {
-            this.tooltip.style.display = "none";
+            this.tooltip.style.visibility = "hidden";
             return;
         }
 
         this.tooltip.style.top = g.getBoundingClientRect().y - 43 + "px";
-        this.tooltip.style.webkitTransform = `translate3d(calc(${g.getBoundingClientRect().x + g.getBoundingClientRect().width / 2}px - 50%), calc(0px), 0)`;
         clear(this.tooltip);
         this.tooltip.innerHTML = `<span style="color: gray">${this.formatMinutes2(start)} - ${this.formatMinutes2(end)}</span>${title !== "" ? ": " + title : ""}`;
-        this.tooltip.style.display = "block";
+        this.tooltip.style.left = `calc(${g.getBoundingClientRect().x + g.getBoundingClientRect().width / 2 - this.tooltip.getBoundingClientRect().width / 2}px)`;
+        this.tooltip.style.visibility = "visible";
     }
 
     /**
