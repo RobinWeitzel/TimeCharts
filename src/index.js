@@ -197,11 +197,11 @@ class Barchart {
     /**
      * Constructs a bar chart
      * @constructor
-     * @param {string} element - css query selector of the container dom element into which the chart is placed
+     * @param {string} element - css query selector of the container dom element into which the chart is placed.
      * @param {Object} [params] - options
      * @param {Object} [params.barSize = 25] - the size of a bar in px.
-     * @param {array} [params.data] - the data to be displayed
-     * @param {string[]} [params.data.labels] - the labels underneath each bar
+     * @param {array} [params.data] - the data to be displayed.
+     * @param {string[]} [params.data.labels] - the labels underneath each bar.
      * @param {Object[]} [params.data.datasets] - each dataset represents one "block" of a bar. To create a stacked bar chart have multiple datasets.
      * @param {number[]} params.data.datasets[].values - the values for each "block" of a bar. Should be between 0 and 1. 
      * @param {string} [params.data.datasets[].title] - the title for the dataset.
@@ -214,7 +214,8 @@ class Barchart {
      * @param {'vertical' | 'horizontal'} [params.orientation = 'vertical'] - orientation for the chart.
      * @param {string} [params.font = 'Roboto'] - the font for all writing. Font must be imported separately.
      * @param {boolean} [params.hover = true] - whether the titles should be shown on hover or not.
-     * @throws Will throw an error if the container element is not found
+     * @param {'variable' | number} [params.distance = 'variable'] - whether the distance between timelines should be variable (based on svg size) or a fixed number of px.
+     * @throws Will throw an error if the container element is not found.
      */
     constructor(element, params) {
         this.container = document.querySelector(element);
@@ -239,7 +240,8 @@ class Barchart {
             orientation: "vertical",
             font: "Roboto",
             hover: true,
-            barSize: 25
+            barSize: 25,
+            distance: 'variable'
         });
 
         this.data = params.data;
@@ -249,6 +251,7 @@ class Barchart {
         this.font = params.font;
         this.hover = params.hover;
         this.barSize = params.barSize;
+        this.distance = params.distance;
 
         if (this.orientation !== "horizontal") {
             this.drawVertical();
@@ -275,7 +278,7 @@ class Barchart {
         const barCount = this.data.datasets.reduce((p, c) => Math.max(p, c.values.length), 0);
         const barWidth = this.barSize;
         const barHeight = 100 - 25 * viewboxHeightScale;
-        const barSpacing = (100 * viewboxWidthScale) / barCount - barWidth;
+        const barSpacing = this.distance === 'variable' ? (100 * viewboxWidthScale) / barCount - barWidth : this.distance;
 
         this.svg = Draw.svg(`calc(100% - ${this.padding.right + this.padding.left}px)`, `calc(100% - ${this.padding.top + this.padding.bottom}px)`, 100 * viewboxWidthScale, 100);
 
@@ -363,7 +366,7 @@ class Barchart {
         const textWidth = this.data.labels.reduce((p, c) => Math.max(p, c.length > 0 ? (2 + c.length * 7.5) * viewboxWidthScale : 0), 0); // 7.5 per char 
         const barWidth = 100 - textWidth;
         const barHeight = this.barSize;
-        const barSpacing = (100 * viewboxHeightScale) / barCount - barHeight;
+        const barSpacing = this.distance === 'variable' ? (100 * viewboxHeightScale) / barCount - barHeight : this.distance;
 
         this.svg = Draw.svg(`calc(100% - ${this.padding.right + this.padding.left}px)`, `calc(100% - ${this.padding.top + this.padding.bottom}px)`, 100, 100 * viewboxHeightScale);
 
@@ -514,8 +517,10 @@ class Timeline {
      * @param {number|string} [params.padding.left] - left padding for the chart.
      * @param {string} [params.font = 'Roboto'] - the font for all writing. Font must be imported separately.
      * @param {boolean} [params.hover = true] - whether the titles should be shown on hover or not.
-     * @param {boolean} [params.legend = true] - whether a legend should be shown underneath the timelines
-     * @throws Will throw an error if the container element is not found
+     * @param {boolean} [params.legend = true] - whether a legend should be shown underneath the timelines.
+     * @param {number} [params.legendDistance = 15] - distance from the last timeline to the legend in px. Always set to 0 if params.legend === false.
+     * @param {'variable' | number} [params.distance = 'variable'] - whether the distance between timelines should be variable (based on svg size) or a fixed number of px.
+     * @throws Will throw an error if the container element is not found.
      */
     constructor(element, params) {
         this.container = document.querySelector(element);
@@ -544,7 +549,8 @@ class Timeline {
             font: "Roboto",
             hover: true,
             legend: true,
-            lineHeight: 25
+            lineHeight: 25,
+            distance: 'variable'
         });
 
         this.scale = params.scale;
@@ -553,7 +559,9 @@ class Timeline {
         this.font = params.font;
         this.hover = params.hover;
         this.legend = params.legend;
+        this.legendDistance = params.legendDistance;
         this.lineHeight = params.lineHeight;
+        this.distance = params.distance;
 
         this.draw();
         window.addEventListener('resize', () => {
@@ -575,12 +583,13 @@ class Timeline {
         const textWidth2 = this.data.timelines.reduce((p, c) => Math.max(p, c.values.reduce((p, c) => Math.max(p, (10 + this.formatMinutes(c.length).length * 7.5) * viewboxWidthScale), 0)), 0); // 7.5 per char
         const widthLeft = Math.max(textWidth1 + textWidth2, 20 * viewboxWidthScale);
         const widthRight = 20 * viewboxWidthScale;
-        const scaleHeight = 15;
+        const scaleHeight = 20;
         const lineWidth = 100 - widthLeft - widthRight;
         const lineHeight = this.lineHeight;
-        const legendHeight = lineHeight;
-        const legendSpacing = 10;
-        const lineSpacing = (100 * viewboxHeightScale - scaleHeight - legendHeight - legendSpacing) / lineCount - lineHeight;
+        const legendHeight = this.legend ? lineHeight : 0;
+        const legendSpacing = this.legend ? this.legendDistance : 0;
+        const lineSpacing = this.distance === 'variable' ? (100 * viewboxHeightScale - scaleHeight - legendHeight - legendSpacing) / lineCount - lineHeight : this.distance;
+        const scaleStart = Math.max(0.5 * lineSpacing - scaleHeight, 0);
 
         this.svg = Draw.svg(`calc(100% - ${this.padding.right + this.padding.left}px)`, `calc(100% - ${this.padding.top + this.padding.bottom}px)`, 100, 100 * viewboxHeightScale);
 
@@ -600,7 +609,7 @@ class Timeline {
         const intervalStepsWidth = lineWidth / intervalSteps;
 
         for (let i = 0; i <= intervalSteps; i++) {
-            const text = Draw.text(widthLeft + intervalStart + i * intervalStepsWidth, 0.5 * lineSpacing - scaleHeight, this.formatMinutes2(from + this.scale.intervalStart + i * interval), "black", this.font, { "text-anchor": "middle", "alignment-baseline": "text-before-edge" });
+            const text = Draw.text(widthLeft + intervalStart + i * intervalStepsWidth, scaleStart, this.formatMinutes2(from + this.scale.intervalStart + i * interval), "black", this.font, { "text-anchor": "middle", "alignment-baseline": "text-before-edge" });
             text.setAttribute("transform", `scale(${viewboxWidthScale},1) translate(${parseFloat(text.getAttribute("x")) / viewboxWidthScale - parseFloat(text.getAttribute("x"))}, 0)`);
             this.svg.appendChild(text);
         }
@@ -621,7 +630,7 @@ class Timeline {
             // Draw background
             // Gray background
             const background = Draw.path(
-                `M ${widthLeft + rx}, ${scaleHeight + (i + 0.5) * lineSpacing + i * lineHeight} a ${rx},${ry} 0 0 0 0,${lineHeight} h ${lineWidth - rx * 2} a ${rx},${ry} 0 0 0 0,${-lineHeight} z`,
+                `M ${widthLeft + rx}, ${scaleStart + scaleHeight + i * (lineSpacing + lineHeight)} a ${rx},${ry} 0 0 0 0,${lineHeight} h ${lineWidth - rx * 2} a ${rx},${ry} 0 0 0 0,${-lineHeight} z`,
                 "#E3E6E9"
             );
             this.svg.appendChild(background);
@@ -631,7 +640,7 @@ class Timeline {
             const stepWidth = lineWidth / steps;
 
             for (let j = 1; j < steps; j++) {
-                const rect = Draw.rect(widthLeft + j * stepWidth - (1 * viewboxWidthScale), scaleHeight + (i + 0.5) * lineSpacing + i * lineHeight, (2 * viewboxWidthScale), lineHeight, "white");
+                const rect = Draw.rect(widthLeft + j * stepWidth - (1 * viewboxWidthScale), scaleStart + scaleHeight + i * (lineSpacing + lineHeight), (2 * viewboxWidthScale), lineHeight, "white");
                 this.svg.appendChild(rect);
             }
 
@@ -655,7 +664,7 @@ class Timeline {
                 }
 
                 const foreground = Draw.path(
-                    `M ${widthLeft + lineWidth * relativeStart + rx},${scaleHeight + (i + 0.5) * lineSpacing + i * lineHeight} a ${rx},${ry} 0 0 0 0,${lineHeight} h ${(lineWidth * (relativeLength - relativeStart)) - rx * 2} a ${rx},${ry} 0 0 0 0,${-lineHeight} z`,
+                    `M ${widthLeft + lineWidth * relativeStart + rx},${scaleStart + scaleHeight + i * (lineSpacing + lineHeight)} a ${rx},${ry} 0 0 0 0,${lineHeight} h ${(lineWidth * (relativeLength - relativeStart)) - rx * 2} a ${rx},${ry} 0 0 0 0,${-lineHeight} z`,
                     color
                 );
                 this.svg.appendChild(foreground);
@@ -667,12 +676,12 @@ class Timeline {
             }
 
             // Draw label
-            const text = Draw.text(0.5 * textWidth1, scaleHeight + (i + 0.5) * (lineSpacing + lineHeight), label, "black", this.font, { "text-anchor": "middle", "alignment-baseline": "central", "font-weight": "bold" });
+            const text = Draw.text(0.5 * textWidth1, scaleStart + scaleHeight + i * lineSpacing + (i + 0.5) * lineHeight, label, "black", this.font, { "text-anchor": "middle", "alignment-baseline": "central", "font-weight": "bold" });
             text.setAttribute("transform", `scale(${viewboxWidthScale},1) translate(${parseFloat(text.getAttribute("x")) / viewboxWidthScale - parseFloat(text.getAttribute("x"))}, 0)`);
             this.svg.appendChild(text);
 
             // Draw sum
-            const text2 = Draw.text(textWidth1, scaleHeight + (i + 0.5) * (lineSpacing + lineHeight), this.formatMinutes(sum), "black", this.font, { "text-anchor": "start", "alignment-baseline": "central" });
+            const text2 = Draw.text(textWidth1, scaleStart + scaleHeight + i * lineSpacing + (i + 0.5) * lineHeight, this.formatMinutes(sum), "black", this.font, { "text-anchor": "start", "alignment-baseline": "central" });
             text2.setAttribute("transform", `scale(${viewboxWidthScale},1) translate(${parseFloat(text2.getAttribute("x")) / viewboxWidthScale - parseFloat(text2.getAttribute("x"))}, 0)`);
             this.svg.appendChild(text2);
 
@@ -682,12 +691,12 @@ class Timeline {
                     const content = `${key} - ${this.formatMinutes(valueMap[key].value)}`;
                     const width = (content.length * 7.5 * viewboxWidthScale) + 2 * rx;
                     const legend = Draw.path(
-                        `M ${widthLeft + x + rx},${legendSpacing + scaleHeight + (lineCount - 0.5) * lineSpacing + lineCount * lineHeight} a ${rx},${ry} 0 0 0 0,${legendHeight} h ${width - rx * 2} a ${rx},${ry} 0 0 0 0,${-legendHeight} z`,
+                        `M ${widthLeft + x + rx},${scaleStart + legendSpacing + scaleHeight + (lineCount - 1) * lineSpacing + lineCount * lineHeight} a ${rx},${ry} 0 0 0 0,${legendHeight} h ${width - rx * 2} a ${rx},${ry} 0 0 0 0,${-legendHeight} z`,
                         valueMap[key].color
                     );
                     this.svg.appendChild(legend);
 
-                    const text = Draw.text(widthLeft + x + 0.5 * width, legendSpacing + legendHeight * 0.5 + scaleHeight + (lineCount - 0.5) * lineSpacing + lineCount * lineHeight, content, "white", this.font, { "text-anchor": "middle", "alignment-baseline": "central" });
+                    const text = Draw.text(widthLeft + x + 0.5 * width, scaleStart + legendSpacing + legendHeight * 0.5 + scaleHeight + (lineCount - 1) * lineSpacing + lineCount * lineHeight, content, "white", this.font, { "text-anchor": "middle", "alignment-baseline": "central" });
                     text.setAttribute("transform", `scale(${viewboxWidthScale},1) translate(${parseFloat(text.getAttribute("x")) / viewboxWidthScale - parseFloat(text.getAttribute("x"))}, 0)`);
                     this.svg.appendChild(text);
 
