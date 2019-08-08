@@ -468,6 +468,19 @@ class Barchart {
         this.tooltip.innerHTML = `<span style="color: gray">${value}</span>${title !== "" ? ": " + title : ""}`;
         this.tooltip.style.display = "block";
     }
+
+    /**
+     * Replaces the existing data with new data.
+     * @param {array} [data] - the data to be displayed
+     * @param {string[]} [data.labels] - the labels underneath each bar
+     * @param {Object[]} [data.datasets] - each dataset represents one "block" of a bar. To create a stacked bar chart have multiple datasets.
+     * @param {number[]} data.datasets[].values - the values for each "block" of a bar. Should be between 0 and 1. 
+     * @param {string} [data.datasets[].title] - the title for the dataset.
+     */
+    setDate(data) {
+        this.data = data;
+        this.draw();
+    }
 }
 
 /**
@@ -763,6 +776,23 @@ class Timeline {
         clear(this.tooltip);
         this.tooltip.innerHTML = `<span style="color: gray">${this.formatMinutes2(start)} - ${this.formatMinutes2(end)}</span>${title !== "" ? ": " + title : ""}`;
         this.tooltip.style.display = "block";
+    }
+
+    /**
+     * Replaces the existing data with new data. 
+     * @param {array} [params.data] - the data to be displayed.
+     * @param {Object[]} [params.data.timelines] - each object represents one timeline. For multiple timelines under each other, have multiple objects.
+     * @param {string} [params.data.timelines[].label] - the label to the right of the timeline.
+     * @param {Object[]} params.data.timelines[].values - the values (marked time slots).
+     * @param {number} params.data.timelines[].values[].start - the point at which the time slot starts in minutes.
+     * @param {number} params.data.timelines[].values[].length - the point at which the time slot ends in minutes.
+     * @param {string} [params.data.timelines[].values[].title] - the title of the time slot.
+     * @param {string[]} [params.data.timelines[].colors = ['#7cd6fd', '#5e64ff', '#743ee2', '#ff5858', '#ffa00a', '#feef72', '#28a745', '#98d85b', '#b554ff', '#ffa3ef', '#36114C', '#bdd3e6', '#f0f4f7', '#b8c2cc']] - the colors for the timeline.
+     * @param {Object} [params.padding] - padding in all directions of the chart.
+     */
+    setDate(data) {
+        this.data = data;
+        this.draw();
     }
 }
 
