@@ -274,6 +274,7 @@ class Barchart {
         const viewboxHeightScale = 100 / realHeight;
         const barCount = this.data.datasets.reduce((p, c) => Math.max(p, c.values.length), 0);
         const barWidth = this.barSize;
+        const barHeight = 100 - 25 * viewboxHeightScale;
         const barSpacing = (100 * viewboxWidthScale) / barCount - barWidth;
 
         this.svg = Draw.svg(`calc(100% - ${this.padding.right + this.padding.left}px)`, `calc(100% - ${this.padding.top + this.padding.bottom}px)`, 100 * viewboxWidthScale, 100);
@@ -293,7 +294,7 @@ class Barchart {
             const ry = barWidth / 2 * viewboxHeightScale;
 
             const background = Draw.path(
-                `M ${(i + 0.5) * barSpacing + i * barWidth},${0} m 0, ${70 - ry} a ${rx},${ry} 0 0 0 ${barWidth},0 v ${ry * 2 - 70} a ${rx},${ry} 0 0 0 ${-barWidth},0 z`,
+                `M ${(i + 0.5) * barSpacing + i * barWidth},${0} m 0, ${barHeight - ry} a ${rx},${ry} 0 0 0 ${barWidth},0 v ${ry * 2 - barHeight} a ${rx},${ry} 0 0 0 ${-barWidth},0 z`,
                 "#E3E6E9"
             );
             this.svg.appendChild(background);
@@ -307,22 +308,22 @@ class Barchart {
                 let foreground;
                 if (this.data.datasets.length === 1) { // single element
                     foreground = Draw.path(
-                        `M ${(i + 0.5) * barSpacing + i * barWidth},${(70 - y) - ry} a ${rx},${ry} 0 0 0 ${barWidth},0 v ${ry * 2 - (70 * value)} a ${rx},${ry} 0 0 0 ${-barWidth},0 z`,
+                        `M ${(i + 0.5) * barSpacing + i * barWidth},${(barHeight - y) - ry} a ${rx},${ry} 0 0 0 ${barWidth},0 v ${ry * 2 - (barHeight * value)} a ${rx},${ry} 0 0 0 ${-barWidth},0 z`,
                         this.colors[j % this.colors.length]
                     );
                 } else if (y === 0) { // First element
                     foreground = Draw.path(
-                        `M ${(i + 0.5) * barSpacing + i * barWidth},${(70 - y) - ry} a ${rx},${ry} 0 0 0 ${barWidth},0 v ${ry - (70 * value)} h ${-barWidth} z`,
+                        `M ${(i + 0.5) * barSpacing + i * barWidth},${(barHeight - y) - ry} a ${rx},${ry} 0 0 0 ${barWidth},0 v ${ry - (barHeight * value)} h ${-barWidth} z`,
                         this.colors[j % this.colors.length]
                     );
-                } else if (y + 70 * value === 70 || j === this.data.datasets.length - 1) { // Last element
+                } else if (y + barHeight * value === barHeight || j === this.data.datasets.length - 1) { // Last element
                     foreground = Draw.path(
-                        `M ${(i + 0.5) * barSpacing + i * barWidth},${70 - y} h ${barWidth} v ${ry - (70 * value)} a ${rx},${ry} 0 0 0 ${-barWidth},0 z`,
+                        `M ${(i + 0.5) * barSpacing + i * barWidth},${barHeight - y} h ${barWidth} v ${ry - (barHeight * value)} a ${rx},${ry} 0 0 0 ${-barWidth},0 z`,
                         this.colors[j % this.colors.length]
                     );
                 } else { // element in the middle
                     foreground = Draw.path(
-                        `M ${(i + 0.5) * barSpacing + i * barWidth},${70 - y} h ${barWidth} v ${-70 * value} h ${-barWidth} z`,
+                        `M ${(i + 0.5) * barSpacing + i * barWidth},${barHeight - y} h ${barWidth} v ${-barHeight * value} h ${-barWidth} z`,
                         this.colors[j % this.colors.length]
                     );
                 }
@@ -332,14 +333,14 @@ class Barchart {
                     foreground.addEventListener("mouseleave", evt => { this.showTooltip(false) });
                 }
 
-                if (y < 70) { // only draw the part if it would not overshoot
+                if (y < barHeight) { // only draw the part if it would not overshoot
                     this.svg.appendChild(foreground);
                 }
 
-                y = y + 70 * value;
+                y = y + barHeight * value;
             }
 
-            const text = Draw.text((i + 0.5) * (barSpacing + barWidth), 70 + (20 * viewboxHeightScale), label, "black", this.font);
+            const text = Draw.text((i + 0.5) * (barSpacing + barWidth), barHeight + (20 * viewboxHeightScale), label, "black", this.font);
             text.setAttribute("transform", `scale(1,${viewboxHeightScale}) translate(0, ${parseFloat(text.getAttribute("y")) / viewboxHeightScale - parseFloat(text.getAttribute("y"))})`);
             this.svg.appendChild(text);
         }
