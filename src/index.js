@@ -283,6 +283,7 @@ class Barchart {
         this.svg.style.paddingRight = this.padding.right;
         this.svg.style.paddingBottom = this.padding.bottom;
         this.svg.style.paddingLeft = this.padding.left;
+        this.svg.style.boxSizing = "initial";
 
         // Draw data
         for (let i = 0; i < barCount; i++) {
@@ -370,6 +371,7 @@ class Barchart {
         this.svg.style.paddingRight = this.padding.right;
         this.svg.style.paddingBottom = this.padding.bottom;
         this.svg.style.paddingLeft = this.padding.left;
+        this.svg.style.boxSizing = "initial";
 
         // Draw data
         for (let i = 0; i < barCount; i++) {
