@@ -573,6 +573,7 @@ class Timeline {
         this.svg.style.paddingRight = this.padding.right;
         this.svg.style.paddingBottom = this.padding.bottom;
         this.svg.style.paddingLeft = this.padding.left;
+        this.svg.style.boxSizing = "initial";
 
         // Draw scale
         const from = this.scale.from;
