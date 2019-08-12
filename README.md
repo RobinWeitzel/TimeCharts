@@ -25,18 +25,23 @@
 ### Installation
 
 #### Via NPM
-Simply install the library
+Simply install the library:
 
 ```
 npm i timecharts
 ```
 
 #### In the Browser
-[Download](https://github.com/RobinWeitzel/TimeCharts/releases/download/v1.0.0/TimeCharts.zip) the library and load it above your JavaScript code.
+Either use a CDN:
 
 ```html
-<link rel="stylesheet" type="text/css" href="./TimeCharts.css">
-<script src="./TimeCharts.js" type="text/javascript"></script>
+<script src="https://unpkg.com/timecharts@latest/dist/TimeCharts.min.js" type="text/javascript"></script>
+```
+
+Or [download](https://github.com/RobinWeitzel/TimeCharts/releases/download/v1.0.11/TimeCharts.min.js) it locally:
+
+```html
+<script src="./TimeCharts.min.js" type="text/javascript"></script>
 ```
 
 ### Usage
