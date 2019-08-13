@@ -495,7 +495,7 @@ class Barchart {
      * @param {number[]} data.datasets[].values - the values for each "block" of a bar. Should be between 0 and 1. 
      * @param {string} [data.datasets[].title] - the title for the dataset.
      */
-    setDate(data) {
+    setData(data) {
         this.data = data;
         this.draw();
     }
@@ -824,7 +824,7 @@ class Timeline {
      * @param {string[]} [params.data.timelines[].colors = ['#7cd6fd', '#5e64ff', '#743ee2', '#ff5858', '#ffa00a', '#feef72', '#28a745', '#98d85b', '#b554ff', '#ffa3ef', '#36114C', '#bdd3e6', '#f0f4f7', '#b8c2cc']] - the colors for the timeline.
      * @param {Object} [params.padding] - padding in all directions of the chart.
      */
-    setDate(data) {
+    setData(data) {
         this.data = data;
         this.draw();
     }
