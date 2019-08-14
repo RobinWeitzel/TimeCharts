@@ -318,21 +318,45 @@ class Barchart {
                 const title = this.data.datasets[j].title || "";
 
                 let foreground;
+                const height = (barHeight * value);
+                const steepness = 0.05; // The smaller, the rounder
+
                 if (this.data.datasets.length === 1) { // single element
-                    foreground = Draw.path(
-                        `M ${(i + 0.5) * barSpacing + i * barWidth},${(barHeight - y) - ry} a ${rx},${ry} 0 0 0 ${barWidth},0 v ${ry * 2 - (barHeight * value)} a ${rx},${ry} 0 0 0 ${-barWidth},0 z`,
-                        this.colors[j % this.colors.length]
-                    );
+                    if(height - ry * 2 < 0) { // bar to short to form circle
+                        foreground = Draw.path(
+                            `M ${(i + 0.5) * barSpacing + i * barWidth}, ${(barHeight - y) - height/2} c ${barWidth * steepness} ${height/2/0.75}, ${barWidth * (1-steepness)} ${height/2/0.75}, ${barWidth} 0 h ${-barWidth} c ${barWidth * steepness} ${-(height/2/0.75)}, ${barWidth * (1-steepness)} ${-(height/2/0.75)}, ${barWidth} 0 z`,
+                            this.colors[j % this.colors.length]
+                        );
+                    } else {
+                        foreground = Draw.path(
+                            `M ${(i + 0.5) * barSpacing + i * barWidth},${(barHeight - y) - ry} a ${rx},${ry} 0 0 0 ${barWidth},0 v ${ry * 2 - (barHeight * value)} a ${rx},${ry} 0 0 0 ${-barWidth},0 z`,
+                            this.colors[j % this.colors.length]
+                        );
+                    }
                 } else if (y === 0) { // First element
-                    foreground = Draw.path(
-                        `M ${(i + 0.5) * barSpacing + i * barWidth},${(barHeight - y) - ry} a ${rx},${ry} 0 0 0 ${barWidth},0 v ${ry - (barHeight * value)} h ${-barWidth} z`,
-                        this.colors[j % this.colors.length]
-                    );
+                    if(height - ry < 0) { // bar to short to form circle
+                        foreground = Draw.path(
+                            `M ${(i + 0.5) * barSpacing + i * barWidth}, ${(barHeight - y) - height} c ${barWidth * steepness} ${height/0.75}, ${barWidth * (1-steepness)} ${height/0.75}, ${barWidth} 0 z`,
+                            this.colors[j % this.colors.length]
+                        );
+                    } else {
+                        foreground = Draw.path(
+                            `M ${(i + 0.5) * barSpacing + i * barWidth},${(barHeight - y) - ry} a ${rx},${ry} 0 0 0 ${barWidth},0 v ${ry - (barHeight * value)} h ${-barWidth} z`,
+                            this.colors[j % this.colors.length]
+                        );
+                    }
                 } else if (y + barHeight * value === barHeight || j === this.data.datasets.length - 1) { // Last element
-                    foreground = Draw.path(
-                        `M ${(i + 0.5) * barSpacing + i * barWidth},${barHeight - y} h ${barWidth} v ${ry - (barHeight * value)} a ${rx},${ry} 0 0 0 ${-barWidth},0 z`,
-                        this.colors[j % this.colors.length]
-                    );
+                    if(height - ry < 0) { // bar to short to form circle
+                        foreground = Draw.path(
+                            `M ${(i + 0.5) * barSpacing + i * barWidth}, ${(barHeight - y)} c ${barWidth * steepness} ${-(height/0.75)}, ${barWidth * (1-steepness)} ${-(height/0.75)}, ${barWidth} 0 z`,
+                            this.colors[j % this.colors.length]
+                        );
+                    } else {
+                        foreground = Draw.path(
+                            `M ${(i + 0.5) * barSpacing + i * barWidth},${barHeight - y} h ${barWidth} v ${ry - (barHeight * value)} a ${rx},${ry} 0 0 0 ${-barWidth},0 z`,
+                            this.colors[j % this.colors.length]
+                        );
+                    }
                 } else { // element in the middle
                     foreground = Draw.path(
                         `M ${(i + 0.5) * barSpacing + i * barWidth},${barHeight - y} h ${barWidth} v ${-barHeight * value} h ${-barWidth} z`,
@@ -412,21 +436,44 @@ class Barchart {
                 const title = this.data.datasets[j].title || "";
 
                 let foreground;
+                const width = (barWidth * value);
+                const steepness = 0.05; // The smaller, the rounder
                 if (this.data.datasets.length === 1) { // single element
-                    foreground = Draw.path(
-                        `M ${textWidth + x + rx},${(i + 0.5) * barSpacing + i * barHeight} a ${rx},${ry} 0 0 0 0,${barHeight} h ${(barWidth * value) - rx * 2} a ${rx},${ry} 0 0 0 0,${-barHeight} z`,
-                        this.colors[j % this.colors.length]
-                    );
+                    if(width - rx * 2 < 0) { // bar to short to form circle
+                        foreground = Draw.path(
+                            `M ${textWidth + x + width/2}, ${(i + 0.5) * barSpacing + i * barHeight} c ${-(width/2 / 0.75)} ${barHeight * steepness}, ${-(width/2 / 0.75)} ${barHeight * (1-steepness)}, 0 ${barHeight} v ${-barHeight} c ${width/2/0.75} ${barHeight * steepness}, ${width/2/0.75} ${barHeight * (1-steepness)}, 0 ${barHeight} z`,
+                            this.colors[j % this.colors.length]
+                        );
+                    } else {
+                        foreground = Draw.path(
+                            `M ${textWidth + x + rx},${(i + 0.5) * barSpacing + i * barHeight} a ${rx},${ry} 0 0 0 0,${barHeight} h ${(barWidth * value) - rx * 2} a ${rx},${ry} 0 0 0 0,${-barHeight} z`,
+                            this.colors[j % this.colors.length]
+                        );
+                    }
                 } else if (x === 0) { // First element
-                    foreground = Draw.path(
-                        `M ${textWidth + x + rx},${(i + 0.5) * barSpacing + i * barHeight} a ${rx},${ry} 0 0 0 0,${barHeight} h ${(barWidth * value) - rx} v ${-barHeight} z`,
-                        this.colors[j % this.colors.length]
-                    );
+                    if(width - rx  < 0) { // bar to short to form circle
+                        foreground = Draw.path(
+                            `M ${textWidth + x + width}, ${(i + 0.5) * barSpacing + i * barHeight} c ${-(width/0.75)} ${barHeight * steepness}, ${-(width/0.75)} ${barHeight * (1-steepness)}, 0 ${barHeight} z`,
+                            this.colors[j % this.colors.length]
+                        );
+                    } else {
+                        foreground = Draw.path(
+                            `M ${textWidth + x + rx},${(i + 0.5) * barSpacing + i * barHeight} a ${rx},${ry} 0 0 0 0,${barHeight} h ${(barWidth * value) - rx} v ${-barHeight} z`,
+                            this.colors[j % this.colors.length]
+                        );
+                    }
                 } else if (x + barWidth * value === barWidth || j === this.data.datasets.length - 1) { // Last element
-                    foreground = Draw.path(
-                        `M ${textWidth + x},${(i + 0.5) * barSpacing + i * barHeight} v ${barHeight} h ${(barWidth * value) - rx} a ${rx},${ry} 0 0 0 0,${-barHeight} z`,
-                        this.colors[j % this.colors.length]
-                    );
+                    if(width - rx  < 0) { // bar to short to form circle
+                        foreground = Draw.path(
+                            `M ${textWidth + x}, ${(i + 0.5) * barSpacing + i * barHeight} c ${width/0.75} ${barHeight * steepness}, ${width/0.75} ${barHeight * (1-steepness)}, 0 ${barHeight} z`,
+                            this.colors[j % this.colors.length]
+                        );
+                    } else {
+                        foreground = Draw.path(
+                            `M ${textWidth + x},${(i + 0.5) * barSpacing + i * barHeight} v ${barHeight} h ${(barWidth * value) - rx} a ${rx},${ry} 0 0 0 0,${-barHeight} z`,
+                            this.colors[j % this.colors.length]
+                        );
+                    }
                 } else { // element in the middle
                     foreground = Draw.path(
                         `M ${textWidth + x}, ${(i + 0.5) * barSpacing + i * barHeight} v ${barHeight} h ${barWidth * value} v ${-barHeight} z`,
@@ -688,10 +735,21 @@ class Timeline {
                     valueMap[title].value = valueMap[title].value + values[j].length;
                 }
 
-                const foreground = Draw.path(
-                    `M ${widthLeft + lineWidth * relativeStart + rx},${scaleStart + scaleHeight + i * (lineSpacing + lineHeight)} a ${rx},${ry} 0 0 0 0,${lineHeight} h ${(lineWidth * (relativeLength - relativeStart)) - rx * 2} a ${rx},${ry} 0 0 0 0,${-lineHeight} z`,
-                    color
-                );
+                let foreground;
+                const width = (lineWidth * (relativeLength - relativeStart));
+                const steepness = 0.05; // The smaller, the rounder
+
+                if(width - rx * 2 < 0) { // bar to short to form circle
+                    foreground = Draw.path(
+                        `M ${widthLeft + lineWidth * relativeStart + width/2}, ${scaleStart + scaleHeight + i * (lineSpacing + lineHeight)} c ${-(width/2 / 0.75)} ${lineHeight * steepness}, ${-(width/2 / 0.75)} ${lineHeight * (1-steepness)}, 0 ${lineHeight} v ${-lineHeight} c ${width/2/0.75} ${lineHeight * steepness}, ${width/2/0.75} ${lineHeight * (1-steepness)}, 0 ${lineHeight} z`,
+                        color
+                    );
+                } else {
+                    foreground = Draw.path(
+                        `M ${widthLeft + lineWidth * relativeStart + rx},${scaleStart + scaleHeight + i * (lineSpacing + lineHeight)} a ${rx},${ry} 0 0 0 0,${lineHeight} h ${(lineWidth * (relativeLength - relativeStart)) - rx * 2} a ${rx},${ry} 0 0 0 0,${-lineHeight} z`,
+                        color
+                    );
+                }
                 this.svg.appendChild(foreground);
 
                 if (this.hover) {
