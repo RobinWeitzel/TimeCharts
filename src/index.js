@@ -544,7 +544,11 @@ class Barchart {
      */
     setData(data) {
         this.data = data;
-        this.draw();
+        if (this.orientation !== "horizontal") {
+            this.drawVertical();
+        } else {
+            this.drawHorizontal();
+        }
     }
 }
 
