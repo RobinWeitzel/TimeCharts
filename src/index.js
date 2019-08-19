@@ -449,7 +449,7 @@ class Barchart {
 
             const background = Draw.path(
                 `M ${textWidth + rx}, ${(i + 0.5) * barSpacing + i * barHeight} a ${rx},${ry} 0 0 0 0,${barHeight} h ${barWidth - rx * 2} a ${rx},${ry} 0 0 0 0,${-barHeight} z`,
-                "#E3E6E9"
+                this.backgroundColor
             );
             this.svg.appendChild(background);
 
@@ -466,42 +466,42 @@ class Barchart {
                     if(width - rx * 2 < 0) { // bar to short to form circle
                         foreground = Draw.path(
                             `M ${textWidth + x + width/2}, ${(i + 0.5) * barSpacing + i * barHeight} c ${-(width/2 / 0.75)} ${barHeight * steepness}, ${-(width/2 / 0.75)} ${barHeight * (1-steepness)}, 0 ${barHeight} v ${-barHeight} c ${width/2/0.75} ${barHeight * steepness}, ${width/2/0.75} ${barHeight * (1-steepness)}, 0 ${barHeight} z`,
-                            this.colors[j % this.colors.length]
+                            this.foregroundColors[j % this.foregroundColors.length]
                         );
                     } else {
                         foreground = Draw.path(
                             `M ${textWidth + x + rx},${(i + 0.5) * barSpacing + i * barHeight} a ${rx},${ry} 0 0 0 0,${barHeight} h ${(barWidth * value) - rx * 2} a ${rx},${ry} 0 0 0 0,${-barHeight} z`,
-                            this.colors[j % this.colors.length]
+                            this.foregroundColors[j % this.foregroundColors.length]
                         );
                     }
                 } else if (x === 0) { // First element
                     if(width - rx  < 0) { // bar to short to form circle
                         foreground = Draw.path(
                             `M ${textWidth + x + width}, ${(i + 0.5) * barSpacing + i * barHeight} c ${-(width/0.75)} ${barHeight * steepness}, ${-(width/0.75)} ${barHeight * (1-steepness)}, 0 ${barHeight} z`,
-                            this.colors[j % this.colors.length]
+                            this.foregroundColors[j % this.foregroundColors.length]
                         );
                     } else {
                         foreground = Draw.path(
                             `M ${textWidth + x + rx},${(i + 0.5) * barSpacing + i * barHeight} a ${rx},${ry} 0 0 0 0,${barHeight} h ${(barWidth * value) - rx} v ${-barHeight} z`,
-                            this.colors[j % this.colors.length]
+                            this.foregroundColors[j % this.foregroundColors.length]
                         );
                     }
                 } else if (x + barWidth * value === barWidth || j === this.data.datasets.length - 1) { // Last element
                     if(width - rx  < 0) { // bar to short to form circle
                         foreground = Draw.path(
                             `M ${textWidth + x}, ${(i + 0.5) * barSpacing + i * barHeight} c ${width/0.75} ${barHeight * steepness}, ${width/0.75} ${barHeight * (1-steepness)}, 0 ${barHeight} z`,
-                            this.colors[j % this.colors.length]
+                            this.foregroundColors[j % this.foregroundColors.length]
                         );
                     } else {
                         foreground = Draw.path(
                             `M ${textWidth + x},${(i + 0.5) * barSpacing + i * barHeight} v ${barHeight} h ${(barWidth * value) - rx} a ${rx},${ry} 0 0 0 0,${-barHeight} z`,
-                            this.colors[j % this.colors.length]
+                            this.foregroundColors[j % this.foregroundColors.length]
                         );
                     }
                 } else { // element in the middle
                     foreground = Draw.path(
                         `M ${textWidth + x}, ${(i + 0.5) * barSpacing + i * barHeight} v ${barHeight} h ${barWidth * value} v ${-barHeight} z`,
-                        this.colors[j % this.colors.length]
+                        this.foregroundColors[j % this.foregroundColors.length]
                     );
                 }
 
@@ -517,7 +517,7 @@ class Barchart {
                 x = x + barWidth * value;
             }
 
-            const text = Draw.text(0, (i + 0.5) * (barSpacing + barHeight), label, "black", this.font, { "text-anchor": "start", "alignment-baseline": "central" });
+            const text = Draw.text(0, (i + 0.5) * (barSpacing + barHeight), label, this.textColor, this.font, { "text-anchor": "start", "alignment-baseline": "central" });
             text.setAttribute("transform", `scale(${viewboxWidthScale},1) translate(${parseFloat(text.getAttribute("x")) / viewboxWidthScale - parseFloat(text.getAttribute("x"))}, 0)`);
             this.svg.appendChild(text);
         }
