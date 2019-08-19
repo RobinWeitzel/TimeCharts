@@ -267,14 +267,29 @@ class Barchart {
 
         if (this.orientation !== "horizontal") {
             this.drawVertical();
-            window.addEventListener('resize', () => {
-                this.drawVertical();
-            });
+
+            if(typeof ResizeObserver === "function") {
+                const ro = new ResizeObserver(entries => {
+                    this.drawVertical();
+                });
+                ro.observe(this.container);
+            } else {
+                window.addEventListener('resize', () => {
+                    this.drawVertical();
+                });
+            }
         } else {
             this.drawHorizontal();
-            window.addEventListener('resize', () => {
-                this.drawHorizontal();
-            });
+            if(typeof ResizeObserver === "function") {
+                const ro = new ResizeObserver(entries => {
+                    this.drawHorizontal();
+                });
+                ro.observe(this.container);
+            } else {
+                window.addEventListener('resize', () => {
+                    this.drawHorizontal();
+                });
+            }
         }
     }
 
@@ -658,9 +673,16 @@ class Timeline {
         this.textColor = params.colors.text;
 
         this.draw();
-        window.addEventListener('resize', () => {
-            this.draw();
-        });
+        if(typeof ResizeObserver === "function") {
+            const ro = new ResizeObserver(entries => {
+                this.draw();
+            });
+            ro.observe(this.container);
+        } else {
+            window.addEventListener('resize', () => {
+                this.draw();
+            });
+        }
     }
 
     /**
