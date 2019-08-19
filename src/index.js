@@ -345,7 +345,7 @@ class Barchart {
                 const height = (barHeight * value);
                 const steepness = 0.05; // The smaller, the rounder
 
-                if (this.data.datasets.length === 1) { // single element
+                if (this.data.datasets.length === 1 || y === 0 && value === 1) { // single element or first element that fully fills chart
                     if(height - ry * 2 < 0) { // bar to short to form circle
                         foreground = Draw.path(
                             `M ${(i + 0.5) * barSpacing + i * barWidth}, ${(barHeight - y) - height/2} c ${barWidth * steepness} ${height/2/0.75}, ${barWidth * (1-steepness)} ${height/2/0.75}, ${barWidth} 0 h ${-barWidth} c ${barWidth * steepness} ${-(height/2/0.75)}, ${barWidth * (1-steepness)} ${-(height/2/0.75)}, ${barWidth} 0 z`,
@@ -462,7 +462,7 @@ class Barchart {
                 let foreground;
                 const width = (barWidth * value);
                 const steepness = 0.05; // The smaller, the rounder
-                if (this.data.datasets.length === 1) { // single element
+                if (this.data.datasets.length === 1 || x === 0 && value === 1) { // single element
                     if(width - rx * 2 < 0) { // bar to short to form circle
                         foreground = Draw.path(
                             `M ${textWidth + x + width/2}, ${(i + 0.5) * barSpacing + i * barHeight} c ${-(width/2 / 0.75)} ${barHeight * steepness}, ${-(width/2 / 0.75)} ${barHeight * (1-steepness)}, 0 ${barHeight} v ${-barHeight} c ${width/2/0.75} ${barHeight * steepness}, ${width/2/0.75} ${barHeight * (1-steepness)}, 0 ${barHeight} z`,
