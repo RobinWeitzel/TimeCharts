@@ -210,7 +210,10 @@ class Barchart {
      * @param {number|string} [params.padding.right] - right padding for the chart.
      * @param {number|string} [params.padding.bottom] - bottom padding for the chart.
      * @param {number|string} [params.padding.left] - left padding for the chart.
-     * @param {string} [params.colors = ['#7cd6fd', '#5e64ff', '#743ee2', '#ff5858', '#ffa00a', '#feef72', '#28a745', '#98d85b', '#b554ff', '#ffa3ef', '#36114C', '#bdd3e6', '#f0f4f7', '#b8c2cc']] - the colors for each bar.
+     * @param {Object} [params.colors] - custom colors
+     * @param {string[]} [params.colors.foreground = ['#7cd6fd', '#5e64ff', '#743ee2', '#ff5858', '#ffa00a', '#feef72', '#28a745', '#98d85b', '#b554ff', '#ffa3ef', '#36114C', '#bdd3e6', '#f0f4f7', '#b8c2cc']] - the colors for each bar.
+     * @param {string} [params.colors.background = "#E3E6E9"] - the color of the background of the bars (not the color of background of the whole chart).
+     * @param {string} [params.colors.text = "black"] - the color of the text.
      * @param {'vertical' | 'horizontal'} [params.orientation = 'vertical'] - orientation for the chart.
      * @param {string} [params.font = 'Roboto'] - the font for all writing. Font must be imported separately.
      * @param {boolean} [params.hover = true] - whether the titles should be shown on hover or not.
@@ -237,7 +240,11 @@ class Barchart {
                 bottom: 0,
                 left: 0
             },
-            colors: ['#7cd6fd', '#5e64ff', '#743ee2', '#ff5858', '#ffa00a', '#feef72', '#28a745', '#98d85b', '#b554ff', '#ffa3ef', '#36114C', '#bdd3e6', '#f0f4f7', '#b8c2cc'],
+            colors: {
+                foreground: ['#7cd6fd', '#5e64ff', '#743ee2', '#ff5858', '#ffa00a', '#feef72', '#28a745', '#98d85b', '#b554ff', '#ffa3ef', '#36114C', '#bdd3e6', '#f0f4f7', '#b8c2cc'],
+                background: "#E3E6E9",
+                text: "black"
+            },
             orientation: "vertical",
             font: "Roboto",
             hover: true,
@@ -248,7 +255,9 @@ class Barchart {
 
         this.data = params.data;
         this.padding = params.padding;
-        this.colors = params.colors;
+        this.foregroundColors = params.colors.foreground;
+        this.backgroundColor = params.colors.background;
+        this.textColor = params.colors.text;
         this.orientation = params.orientation;
         this.font = params.font;
         this.hover = params.hover;
@@ -307,7 +316,7 @@ class Barchart {
 
             const background = Draw.path(
                 `M ${(i + 0.5) * barSpacing + i * barWidth},${0} m 0, ${barHeight - ry} a ${rx},${ry} 0 0 0 ${barWidth},0 v ${ry * 2 - barHeight} a ${rx},${ry} 0 0 0 ${-barWidth},0 z`,
-                "#E3E6E9"
+                this.backgroundColor
             );
             this.svg.appendChild(background);
 
@@ -325,42 +334,42 @@ class Barchart {
                     if(height - ry * 2 < 0) { // bar to short to form circle
                         foreground = Draw.path(
                             `M ${(i + 0.5) * barSpacing + i * barWidth}, ${(barHeight - y) - height/2} c ${barWidth * steepness} ${height/2/0.75}, ${barWidth * (1-steepness)} ${height/2/0.75}, ${barWidth} 0 h ${-barWidth} c ${barWidth * steepness} ${-(height/2/0.75)}, ${barWidth * (1-steepness)} ${-(height/2/0.75)}, ${barWidth} 0 z`,
-                            this.colors[j % this.colors.length]
+                            this.foregroundColors[j % this.foregroundColors.length]
                         );
                     } else {
                         foreground = Draw.path(
                             `M ${(i + 0.5) * barSpacing + i * barWidth},${(barHeight - y) - ry} a ${rx},${ry} 0 0 0 ${barWidth},0 v ${ry * 2 - (barHeight * value)} a ${rx},${ry} 0 0 0 ${-barWidth},0 z`,
-                            this.colors[j % this.colors.length]
+                            this.foregroundColors[j % this.foregroundColors.length]
                         );
                     }
                 } else if (y === 0) { // First element
                     if(height - ry < 0) { // bar to short to form circle
                         foreground = Draw.path(
                             `M ${(i + 0.5) * barSpacing + i * barWidth}, ${(barHeight - y) - height} c ${barWidth * steepness} ${height/0.75}, ${barWidth * (1-steepness)} ${height/0.75}, ${barWidth} 0 z`,
-                            this.colors[j % this.colors.length]
+                            this.foregroundColors[j % this.foregroundColors.length]
                         );
                     } else {
                         foreground = Draw.path(
                             `M ${(i + 0.5) * barSpacing + i * barWidth},${(barHeight - y) - ry} a ${rx},${ry} 0 0 0 ${barWidth},0 v ${ry - (barHeight * value)} h ${-barWidth} z`,
-                            this.colors[j % this.colors.length]
+                            this.foregroundColors[j % this.foregroundColors.length]
                         );
                     }
                 } else if (y + barHeight * value === barHeight || j === this.data.datasets.length - 1) { // Last element
                     if(height - ry < 0) { // bar to short to form circle
                         foreground = Draw.path(
                             `M ${(i + 0.5) * barSpacing + i * barWidth}, ${(barHeight - y)} c ${barWidth * steepness} ${-(height/0.75)}, ${barWidth * (1-steepness)} ${-(height/0.75)}, ${barWidth} 0 z`,
-                            this.colors[j % this.colors.length]
+                            this.foregroundColors[j % this.foregroundColors.length]
                         );
                     } else {
                         foreground = Draw.path(
                             `M ${(i + 0.5) * barSpacing + i * barWidth},${barHeight - y} h ${barWidth} v ${ry - (barHeight * value)} a ${rx},${ry} 0 0 0 ${-barWidth},0 z`,
-                            this.colors[j % this.colors.length]
+                            this.foregroundColors[j % this.foregroundColors.length]
                         );
                     }
                 } else { // element in the middle
                     foreground = Draw.path(
                         `M ${(i + 0.5) * barSpacing + i * barWidth},${barHeight - y} h ${barWidth} v ${-barHeight * value} h ${-barWidth} z`,
-                        this.colors[j % this.colors.length]
+                        this.foregroundColors[j % this.foregroundColors.length]
                     );
                 }
 
@@ -376,7 +385,7 @@ class Barchart {
                 y = y + barHeight * value;
             }
 
-            const text = Draw.text((i + 0.5) * (barSpacing + barWidth), barHeight + (20 * viewboxHeightScale), label, "black", this.font);
+            const text = Draw.text((i + 0.5) * (barSpacing + barWidth), barHeight + (20 * viewboxHeightScale), label, this.textColor, this.font);
             text.setAttribute("transform", `scale(1,${viewboxHeightScale}) translate(0, ${parseFloat(text.getAttribute("y")) / viewboxHeightScale - parseFloat(text.getAttribute("y"))})`);
             this.svg.appendChild(text);
         }
@@ -581,10 +590,15 @@ class Timeline {
      * @param {number|string} [params.padding.right] - right padding for the chart.
      * @param {number|string} [params.padding.bottom] - bottom padding for the chart.
      * @param {number|string} [params.padding.left] - left padding for the chart.
+     * @param {Object} [params.colors] - custom colors
+     * @param {string} [params.colors.background = "#E3E6E9"] - the color of the background of the bars (not the color of background of the whole chart).
+     * @param {string} [params.colors.text = "black"] - the color of the text.
      * @param {string} [params.font = 'Roboto'] - the font for all writing. Font must be imported separately.
      * @param {boolean} [params.hover = true] - whether the titles should be shown on hover or not.
-     * @param {boolean} [params.legend = true] - whether a legend should be shown underneath the timelines.
-     * @param {number} [params.legendDistance = 15] - distance from the last timeline to the legend in px. Always set to 0 if params.legend === false.
+     * @param {Object} [params.legend] - options for the legend.
+     * @param {boolean} [params.legend.visible = true] - whether a legend should be shown underneath the timelines.
+     * @param {number} [params.legend.distance = 15] - distance from the last timeline to the legend in px. Always set to 0 if params.legend.visible === false.
+     * @param {number} [params.legend.textColor = "white"] - the color of the text in the legend.
      * @param {'variable' | number} [params.distance = 'variable'] - whether the distance between timelines should be variable (based on svg size) or a fixed number of px.
      * @param {boolean} [params.adjustSize = false] - whether the size of the container should be adjusted based on the needed space. Only works if params.distance != 'variable'.
      * @throws Will throw an error if the container element is not found.
@@ -613,10 +627,17 @@ class Timeline {
                 bottom: 0,
                 left: 0
             },
+            colors: {
+                background: "#E3E6E9",
+                text: "black"
+            },
             font: "Roboto",
             hover: true,
-            legend: true,
-            legendDistance: 15,
+            legend: {
+                visible: true,
+                distance: 15,
+                textColor: "white"
+            },
             lineHeight: 25,
             distance: 'variable',
             adjustSize: false
@@ -627,11 +648,14 @@ class Timeline {
         this.padding = params.padding;
         this.font = params.font;
         this.hover = params.hover;
-        this.legend = params.legend;
-        this.legendDistance = params.legendDistance;
+        this.legend = params.legend.visible;
+        this.legendDistance = params.legend.distance;
+        this.legendTextColor = params.legend.textColor;
         this.lineHeight = params.lineHeight;
         this.distance = params.distance;
         this.adjustSize = this.distance !== 'variable' && params.adjustSize;
+        this.backgroundColor = params.colors.background;
+        this.textColor = params.colors.text;
 
         this.draw();
         window.addEventListener('resize', () => {
@@ -685,7 +709,7 @@ class Timeline {
         const intervalStepsWidth = lineWidth / intervalSteps;
 
         for (let i = 0; i <= intervalSteps; i++) {
-            const text = Draw.text(widthLeft + intervalStart + i * intervalStepsWidth, scaleStart, this.formatMinutes2(from + this.scale.intervalStart + i * interval), "black", this.font, { "text-anchor": "middle", "alignment-baseline": "text-before-edge" });
+            const text = Draw.text(widthLeft + intervalStart + i * intervalStepsWidth, scaleStart, this.formatMinutes2(from + this.scale.intervalStart + i * interval), this.textColor, this.font, { "text-anchor": "middle", "alignment-baseline": "text-before-edge" });
             text.setAttribute("transform", `scale(${viewboxWidthScale},1) translate(${parseFloat(text.getAttribute("x")) / viewboxWidthScale - parseFloat(text.getAttribute("x"))}, 0)`);
             this.svg.appendChild(text);
         }
@@ -707,7 +731,7 @@ class Timeline {
             // Gray background
             const background = Draw.path(
                 `M ${widthLeft + rx}, ${scaleStart + scaleHeight + i * (lineSpacing + lineHeight)} a ${rx},${ry} 0 0 0 0,${lineHeight} h ${lineWidth - rx * 2} a ${rx},${ry} 0 0 0 0,${-lineHeight} z`,
-                "#E3E6E9"
+                this.backgroundColor
             );
             this.svg.appendChild(background);
 
@@ -741,6 +765,31 @@ class Timeline {
 
                 let foreground;
                 const width = (lineWidth * (relativeLength - relativeStart));
+
+                const polarToCartesian = (centerX, centerY, radius, angleInDegrees) => {
+                    const angleInRadians = (angleInDegrees-90) * Math.PI / 180.0;
+                  
+                    return {
+                      x: centerX + (radius * Math.cos(angleInRadians)),
+                      y: centerY + (radius * Math.sin(angleInRadians))
+                    };
+                }
+
+                const partialCircle = (x, y, radius, startAngle, endAngle) => {
+                  
+                      const start = polarToCartesian(x, y, radius, endAngle);
+                      const end = polarToCartesian(x, y, radius, startAngle);
+                  
+                      const largeArcFlag = endAngle - startAngle <= 180 ? "0" : "1";
+                  
+                      const d = [
+                          "M", start.x, start.y, 
+                          "A", radius, radius, 0, largeArcFlag, 0, end.x, end.y,
+                          "L", 
+                      ].join(" ");
+                  
+                      return d;       
+                  }
                 const steepness = 0.05; // The smaller, the rounder
 
                 if(width - rx * 2 < 0) { // bar to short to form circle
@@ -763,12 +812,12 @@ class Timeline {
             }
 
             // Draw label
-            const text = Draw.text(0.5 * textWidth1, scaleStart + scaleHeight + i * lineSpacing + (i + 0.5) * lineHeight, label, "black", this.font, { "text-anchor": "middle", "alignment-baseline": "central", "font-weight": "bold" });
+            const text = Draw.text(0.5 * textWidth1, scaleStart + scaleHeight + i * lineSpacing + (i + 0.5) * lineHeight, label, this.textColor, this.font, { "text-anchor": "middle", "alignment-baseline": "central", "font-weight": "bold" });
             text.setAttribute("transform", `scale(${viewboxWidthScale},1) translate(${parseFloat(text.getAttribute("x")) / viewboxWidthScale - parseFloat(text.getAttribute("x"))}, 0)`);
             this.svg.appendChild(text);
 
             // Draw sum
-            const text2 = Draw.text(textWidth1, scaleStart + scaleHeight + i * lineSpacing + (i + 0.5) * lineHeight, this.formatMinutes(sum), "black", this.font, { "text-anchor": "start", "alignment-baseline": "central" });
+            const text2 = Draw.text(textWidth1, scaleStart + scaleHeight + i * lineSpacing + (i + 0.5) * lineHeight, this.formatMinutes(sum), this.textColor, this.font, { "text-anchor": "start", "alignment-baseline": "central" });
             text2.setAttribute("transform", `scale(${viewboxWidthScale},1) translate(${parseFloat(text2.getAttribute("x")) / viewboxWidthScale - parseFloat(text2.getAttribute("x"))}, 0)`);
             this.svg.appendChild(text2);
 
@@ -783,7 +832,7 @@ class Timeline {
                     );
                     this.svg.appendChild(legend);
 
-                    const text = Draw.text(widthLeft + x + 0.5 * width, scaleStart + legendSpacing + legendHeight * 0.5 + scaleHeight + (lineCount - 1) * lineSpacing + lineCount * lineHeight, content, "white", this.font, { "text-anchor": "middle", "alignment-baseline": "central" });
+                    const text = Draw.text(widthLeft + x + 0.5 * width, scaleStart + legendSpacing + legendHeight * 0.5 + scaleHeight + (lineCount - 1) * lineSpacing + lineCount * lineHeight, content, this.legendTextColor, this.font, { "text-anchor": "middle", "alignment-baseline": "central" });
                     text.setAttribute("transform", `scale(${viewboxWidthScale},1) translate(${parseFloat(text.getAttribute("x")) / viewboxWidthScale - parseFloat(text.getAttribute("x"))}, 0)`);
                     this.svg.appendChild(text);
 
