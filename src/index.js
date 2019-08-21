@@ -56,6 +56,251 @@ function mergeObjects(obj, merger, overwrite) {
     }
 }
 
+/**
+ * Generates coordinates for arcs based on the center position, the radius and the angle
+ * @param {number} centerX - the x-coordinate of the center
+ * @param {number} centerY - the y-coordinate of the center
+ * @param {number} radiusX - the x-radius
+ * @param {number} radiusY - the y-radius
+ * @param {number} angleInDegrees - the angle
+ */
+function polarToCartesian(centerX, centerY, radiusX, radiusY, angleInDegrees) {
+    const angleInRadians = (angleInDegrees - 90) * Math.PI / 180.0;
+
+    return {
+        x: centerX + (radiusX * Math.cos(angleInRadians)),
+        y: centerY + (radiusY * Math.sin(angleInRadians))
+    };
+}
+
+/**
+ * Creates the svg path string for an arc
+ * @param {number} x - the x-coordinate of the center
+ * @param {number} y - the y-coordinate of the center
+ * @param {number} radiusX - the x-radius
+ * @param {number} radiusY - the y-radius
+ * @param {number} startAngle - the angle at which the arc starts
+ * @param {number} endAngle - the angle at which the arc ends
+ * @param {number} outerArc - the flag for the outer arc
+ */
+function describeArc(x, y, radiusX, radiusY, startAngle, endAngle, outerArc) {
+    const start = polarToCartesian(x, y, radiusX, radiusY, endAngle);
+    const end = polarToCartesian(x, y, radiusX, radiusY, startAngle);
+
+    const largeArcFlag = endAngle - startAngle <= 180 ? "0" : "1";
+
+    const d = [
+        "M", start.x, start.y,
+        "A", radiusX, radiusY, 0, largeArcFlag, outerArc, end.x, end.y
+    ].join(" ");
+
+    return [d, start, end];
+}
+
+/**
+ * Creates the svg path string for the top circle/arc of a bar
+ * @param {number} x - the x-coordinate of the center
+ * @param {number} y - the y-coordinate of the center
+ * @param {number} radiusX - the x-radius
+ * @param {number} radiusY - the y-radius
+ * @param {number} heightDelta - the height of the arc (not the height of the bar i.e. must be <= radiusY - heightOld)
+ * @param {number} heightOld - the old height (where the arc should start)
+ */
+function createTopArc(x, y, radiusX, radiusY, heightDelta, heightOld) {
+    // Calculate degrees
+    const alphaOld = Math.acos((radiusY - heightOld) / radiusY) / Math.PI * 180;
+    const alphaNew = Math.acos((radiusY - (heightOld + heightDelta)) / radiusY)  / Math.PI * 180;
+    
+    const arc1 = describeArc(x, y, radiusX, radiusY, alphaOld, alphaNew, 0);
+    const arc2 = describeArc(x, y, radiusX, radiusY, 360-alphaOld, 360-alphaNew, 1);
+  
+    const d = [
+        arc1[0],
+        "L", arc2[2].x, arc2[2].y,
+        arc2[0],
+        "L", arc1[1].x, arc1[1].y,
+    ].join(" ");
+  
+  return d;
+}
+
+/**
+ * Creates the svg path string for the right circle/arc of a bar
+ * @param {number} x - the x-coordinate of the center
+ * @param {number} y - the y-coordinate of the center
+ * @param {number} radiusX - the x-radius
+ * @param {number} radiusY - the y-radius
+ * @param {number} widthDelta - the width of the arc (not the height of the bar i.e. must be <= radiusX - widthOld)
+ * @param {number} widthOld - the old width (where the arc should start)
+ */
+function createRightArc(x, y, radiusX, radiusY, widthDelta, widthOld) {
+    // Calculate degrees
+    const alphaOld = Math.acos((radiusX - widthOld) / radiusX) / Math.PI * 180;
+    const alphaNew = Math.acos((radiusX - (widthOld + widthDelta)) / radiusX)  / Math.PI * 180;
+    
+    const arc1 = describeArc(x, y, radiusX, radiusY, 90+alphaOld, 90+alphaNew, 0);
+    const arc2 = describeArc(x, y, radiusX, radiusY, 90+360-alphaOld, 90+360-alphaNew, 1);
+  
+    const d = [
+        arc1[0],
+        "L", arc2[2].x, arc2[2].y,
+        arc2[0],
+        "L", arc1[1].x, arc1[1].y,
+    ].join(" ");
+  
+  return d;
+}
+
+/**
+ * Creates the svg path string for the bottom circle/arc of a bar
+ * @param {number} x - the x-coordinate of the center
+ * @param {number} y - the y-coordinate of the center
+ * @param {number} radiusX - the x-radius
+ * @param {number} radiusY - the y-radius
+ * @param {number} heightDelta - the height of the arc (not the height of the bar i.e. must be <= radiusY - heightOld)
+ * @param {number} heightOld - the old height (where the arc should start)
+ */
+function createBottomArc(x, y, radiusX, radiusY, heightDelta, heightOld) {
+    // Calculate degrees
+    const alphaOld = Math.acos((radiusY - heightOld) / radiusY) / Math.PI * 180;
+    const alphaNew = Math.acos((radiusY - (heightOld + heightDelta)) / radiusY)  / Math.PI * 180;
+    
+    const arc1 = describeArc(x, y, radiusX, radiusY, 180+alphaOld, 180+alphaNew, 0);
+    const arc2 = describeArc(x, y, radiusX, radiusY, 180-alphaOld, 180-alphaNew, 1);
+  
+    const d = [
+        arc1[0],
+        "L", arc2[2].x, arc2[2].y,
+        arc2[0],
+        "L", arc1[1].x, arc1[1].y,
+    ].join(" ");
+  
+  return d;
+}
+
+/**
+ * Creates the svg path string for the left circle/arc of a bar
+ * @param {number} x - the x-coordinate of the center
+ * @param {number} y - the y-coordinate of the center
+ * @param {number} radiusX - the x-radius
+ * @param {number} radiusY - the y-radius
+ * @param {number} widthDelta - the width of the arc (not the height of the bar i.e. must be <= radiusX - widthOld)
+ * @param {number} widthOld - the old width (where the arc should start)
+ */
+function createLeftArc(x, y, radiusX, radiusY, widthDelta, widthOld) {
+    // Calculate degrees
+    const alphaOld = Math.acos((radiusX - widthOld) / radiusX) / Math.PI * 180;
+    const alphaNew = Math.acos((radiusX - (widthOld + widthDelta)) / radiusX)  / Math.PI * 180;
+    
+    const arc1 = describeArc(x, y, radiusX, radiusY, 90+180+alphaOld, 90+180+alphaNew, 0);
+    const arc2 = describeArc(x, y, radiusX, radiusY, 90+180+360-alphaOld, 90+180+360-alphaNew, 1);
+  
+    const d = [
+        arc1[0],
+        "L", arc2[2].x, arc2[2].y,
+        arc2[0],
+        "L", arc1[1].x, arc1[1].y,
+    ].join(" ");
+  
+  return d;
+}
+
+/**
+ * Creates the svg path string for a vertical bar
+ * @param {number} x - x-coordinate of the left side of the bar
+ * @param {number} y - y-coordinate of the bottom side of the bar
+ * @param {number} radiusX - the x-radius
+ * @param {number} radiusY - the y-radius
+ * @param {number} heightDelta - the height of the bar-portion
+ * @param {number} heightOld - the height where the bar-portion should start
+ * @param {number} heightMax - the full height of the bar chart
+ */
+function createVerticalBar(x, y, radiusX, radiusY, heightDelta, heightOld, heightMax) {
+    let bottomArcHeight = 0;
+    let bottomArc = "";
+    
+    if(heightOld < radiusY) { // Bar starts in the bottom circle
+        bottomArcHeight = Math.min(heightDelta, radiusY - heightOld);
+        bottomArc = createBottomArc(x + radiusX, y - radiusY, radiusX, radiusY, bottomArcHeight, heightOld);
+    } 
+
+    let topArcHeight = 0;
+    let topArc = "";
+
+    if(heightOld + heightDelta > heightMax - radiusY) { // Bar ends in the top circle
+        topArcHeight = Math.min(heightDelta, (heightOld + heightDelta) - (heightMax - radiusY));
+        topArc = createTopArc(x + radiusX, y - heightMax + radiusY, radiusX, radiusY, topArcHeight, Math.max(0, heightOld - (heightMax - radiusY)));
+    }
+
+    let middleHeight = heightDelta - bottomArcHeight - topArcHeight;
+    let middle = "";
+    if(middleHeight > 0){
+        middle = [
+            "M", x, y - heightOld - bottomArcHeight,
+            "v", -middleHeight,
+            "h", radiusX * 2,
+            "v", middleHeight,
+            "h", -radiusX * 2,
+        ].join(" ");
+    }
+
+    const d = [
+        bottomArc,
+        middle,
+        topArc
+    ].join(" ");
+
+    return d;
+}
+
+/**
+ * Creates the svg path string for a horizontal bar
+ * @param {number} x - x-coordinate of the left side of the bar
+ * @param {number} y - y-coordinate of the top side of the bar
+ * @param {number} radiusX - the x-radius
+ * @param {number} radiusY - the y-radius
+ * @param {number} widthDelta - the width of the bar-portion
+ * @param {number} widthOld - the width where the bar-portion should start
+ * @param {number} widthMax - the full width of the bar chart
+ */
+function createHorizontalBar(x, y, radiusX, radiusY, widthDelta, widthOld, widthMax) {
+    let leftArcWidth = 0;
+    let leftArc = "";
+    
+    if(widthOld < radiusX) { // Bar starts in the left circle
+        leftArcWidth = Math.min(widthDelta, radiusX - widthOld);
+        leftArc = createLeftArc(x + radiusX, y + radiusY, radiusX, radiusY, leftArcWidth, widthOld);
+    } 
+
+    let rightArcWidth = 0;
+    let rightArc = "";
+
+    if(widthOld + widthDelta > widthMax - radiusX) { // Bar ends in the top circle
+        rightArcWidth = Math.min(widthDelta, (widthOld + widthDelta) - (widthMax - radiusX));
+        rightArc = createRightArc(x + widthMax - radiusX, y + radiusY, radiusX, radiusY, rightArcWidth, Math.max(0, widthOld - (widthMax - radiusX)));
+    }
+
+    let middleWidth = widthDelta - leftArcWidth - rightArcWidth;
+    let middle = "";
+    if(middleWidth > 0){
+        middle = [
+            "M", x + widthOld + leftArcWidth, y,
+            "h", middleWidth,
+            "v", radiusY * 2,
+            "h", -middleWidth,
+            "v", -radiusY * 2,
+        ].join(" ");
+    }
+
+    const d = [
+        leftArc,
+        middle,
+        rightArc
+    ].join(" ");
+
+    return d;
+}
+
 class Draw {
     /**
      * Creates an svg object.
@@ -268,7 +513,7 @@ class Barchart {
         if (this.orientation !== "horizontal") {
             this.drawVertical();
 
-            if(typeof ResizeObserver === "function") {
+            if (typeof ResizeObserver === "function") {
                 const ro = new ResizeObserver(entries => {
                     this.drawVertical();
                 });
@@ -280,7 +525,7 @@ class Barchart {
             }
         } else {
             this.drawHorizontal();
-            if(typeof ResizeObserver === "function") {
+            if (typeof ResizeObserver === "function") {
                 const ro = new ResizeObserver(entries => {
                     this.drawHorizontal();
                 });
@@ -304,15 +549,15 @@ class Barchart {
         const barWidth = this.barSize;
         const barHeight = 100 - 25 * viewboxHeightScale;
 
-        if(this.adjustSize) {
-            const width = (barWidth+this.distance) * barCount + this.padding.left + this.padding.right;
+        if (this.adjustSize) {
+            const width = (barWidth + this.distance) * barCount + this.padding.left + this.padding.right;
             this.container.style.width = `${width}px`;
         }
-        
+
         const realWidth = this.container.clientWidth - this.padding.right - this.padding.left;
         const viewboxWidthScale = realWidth / 100;
         const barSpacing = this.distance === 'variable' ? (100 * viewboxWidthScale) / barCount - barWidth : this.distance;
-        
+
         this.svg = Draw.svg(`calc(100% - ${this.padding.right + this.padding.left}px)`, `calc(100% - ${this.padding.top + this.padding.bottom}px)`, 100 * viewboxWidthScale, 100);
 
         // Padding
@@ -341,63 +586,24 @@ class Barchart {
                 const value = this.data.datasets[j].values[i] || 0;
                 const title = this.data.datasets[j].title || "";
 
-                let foreground;
                 const height = (barHeight * value);
-                const steepness = 0.05; // The smaller, the rounder
-
-                if (this.data.datasets.length === 1 || y === 0 && value === 1) { // single element or first element that fully fills chart
-                    if(height - ry * 2 < 0) { // bar to short to form circle
-                        foreground = Draw.path(
-                            `M ${(i + 0.5) * barSpacing + i * barWidth}, ${(barHeight - y) - height/2} c ${barWidth * steepness} ${height/2/0.75}, ${barWidth * (1-steepness)} ${height/2/0.75}, ${barWidth} 0 h ${-barWidth} c ${barWidth * steepness} ${-(height/2/0.75)}, ${barWidth * (1-steepness)} ${-(height/2/0.75)}, ${barWidth} 0 z`,
-                            this.foregroundColors[j % this.foregroundColors.length]
-                        );
-                    } else {
-                        foreground = Draw.path(
-                            `M ${(i + 0.5) * barSpacing + i * barWidth},${(barHeight - y) - ry} a ${rx},${ry} 0 0 0 ${barWidth},0 v ${ry * 2 - (barHeight * value)} a ${rx},${ry} 0 0 0 ${-barWidth},0 z`,
-                            this.foregroundColors[j % this.foregroundColors.length]
-                        );
-                    }
-                } else if (y === 0) { // First element
-                    if(height - ry < 0) { // bar to short to form circle
-                        foreground = Draw.path(
-                            `M ${(i + 0.5) * barSpacing + i * barWidth}, ${(barHeight - y) - height} c ${barWidth * steepness} ${height/0.75}, ${barWidth * (1-steepness)} ${height/0.75}, ${barWidth} 0 z`,
-                            this.foregroundColors[j % this.foregroundColors.length]
-                        );
-                    } else {
-                        foreground = Draw.path(
-                            `M ${(i + 0.5) * barSpacing + i * barWidth},${(barHeight - y) - ry} a ${rx},${ry} 0 0 0 ${barWidth},0 v ${ry - (barHeight * value)} h ${-barWidth} z`,
-                            this.foregroundColors[j % this.foregroundColors.length]
-                        );
-                    }
-                } else if (y + barHeight * value === barHeight || j === this.data.datasets.length - 1) { // Last element
-                    if(height - ry < 0) { // bar to short to form circle
-                        foreground = Draw.path(
-                            `M ${(i + 0.5) * barSpacing + i * barWidth}, ${(barHeight - y)} c ${barWidth * steepness} ${-(height/0.75)}, ${barWidth * (1-steepness)} ${-(height/0.75)}, ${barWidth} 0 z`,
-                            this.foregroundColors[j % this.foregroundColors.length]
-                        );
-                    } else {
-                        foreground = Draw.path(
-                            `M ${(i + 0.5) * barSpacing + i * barWidth},${barHeight - y} h ${barWidth} v ${ry - (barHeight * value)} a ${rx},${ry} 0 0 0 ${-barWidth},0 z`,
-                            this.foregroundColors[j % this.foregroundColors.length]
-                        );
-                    }
-                } else { // element in the middle
-                    foreground = Draw.path(
-                        `M ${(i + 0.5) * barSpacing + i * barWidth},${barHeight - y} h ${barWidth} v ${-barHeight * value} h ${-barWidth} z`,
+                if(height > 0 && y < barHeight) {
+                    const foreground = Draw.path(
+                        createVerticalBar((i + 0.5) * barSpacing + i * barWidth, barHeight, rx, ry, height, y, barHeight),
                         this.foregroundColors[j % this.foregroundColors.length]
                     );
-                }
 
-                if (this.hover) {
-                    foreground.addEventListener('mouseenter', evt => { this.showTooltip(true, foreground, value, title) });
-                    foreground.addEventListener("mouseleave", evt => { this.showTooltip(false) });
-                }
+                    if (this.hover) {
+                        foreground.addEventListener('mouseenter', evt => { this.showTooltip(true, foreground, value, title) });
+                        foreground.addEventListener("mouseleave", evt => { this.showTooltip(false) });
+                    }
 
-                if (y < barHeight) { // only draw the part if it would not overshoot
-                    this.svg.appendChild(foreground);
-                }
+                    if (y < barHeight) { // only draw the part if it would not overshoot
+                        this.svg.appendChild(foreground);
+                    }
 
-                y = y + barHeight * value;
+                    y = y + height;
+                }
             }
 
             const text = Draw.text((i + 0.5) * (barSpacing + barWidth), barHeight + (20 * viewboxHeightScale), label, this.textColor, this.font);
@@ -421,16 +627,16 @@ class Barchart {
         const textWidth = this.data.labels.reduce((p, c) => Math.max(p, c.length > 0 ? (2 + c.length * 7.5) * viewboxWidthScale : 0), 0); // 7.5 per char 
         const barWidth = 100 - textWidth;
         const barHeight = this.barSize;
-        
-        if(this.adjustSize) {
+
+        if (this.adjustSize) {
             const height = (barCount + this.distance) * barHeight + this.padding.top + this.padding.bottom;
             this.container.style.height = `${height}px`;
         }
-        
+
         const realHeight = this.container.clientHeight - this.padding.top - this.padding.bottom;
         const viewboxHeightScale = realHeight / 100;
         const barSpacing = this.distance === 'variable' ? (100 * viewboxHeightScale) / barCount - barHeight : this.distance;
-        
+
         this.svg = Draw.svg(`calc(100% - ${this.padding.right + this.padding.left}px)`, `calc(100% - ${this.padding.top + this.padding.bottom}px)`, 100, 100 * viewboxHeightScale);
 
         // Padding
@@ -459,62 +665,25 @@ class Barchart {
                 const value = this.data.datasets[j].values[i] || 0;
                 const title = this.data.datasets[j].title || "";
 
-                let foreground;
                 const width = (barWidth * value);
-                const steepness = 0.05; // The smaller, the rounder
-                if (this.data.datasets.length === 1 || x === 0 && value === 1) { // single element
-                    if(width - rx * 2 < 0) { // bar to short to form circle
-                        foreground = Draw.path(
-                            `M ${textWidth + x + width/2}, ${(i + 0.5) * barSpacing + i * barHeight} c ${-(width/2 / 0.75)} ${barHeight * steepness}, ${-(width/2 / 0.75)} ${barHeight * (1-steepness)}, 0 ${barHeight} v ${-barHeight} c ${width/2/0.75} ${barHeight * steepness}, ${width/2/0.75} ${barHeight * (1-steepness)}, 0 ${barHeight} z`,
-                            this.foregroundColors[j % this.foregroundColors.length]
-                        );
-                    } else {
-                        foreground = Draw.path(
-                            `M ${textWidth + x + rx},${(i + 0.5) * barSpacing + i * barHeight} a ${rx},${ry} 0 0 0 0,${barHeight} h ${(barWidth * value) - rx * 2} a ${rx},${ry} 0 0 0 0,${-barHeight} z`,
-                            this.foregroundColors[j % this.foregroundColors.length]
-                        );
-                    }
-                } else if (x === 0) { // First element
-                    if(width - rx  < 0) { // bar to short to form circle
-                        foreground = Draw.path(
-                            `M ${textWidth + x + width}, ${(i + 0.5) * barSpacing + i * barHeight} c ${-(width/0.75)} ${barHeight * steepness}, ${-(width/0.75)} ${barHeight * (1-steepness)}, 0 ${barHeight} z`,
-                            this.foregroundColors[j % this.foregroundColors.length]
-                        );
-                    } else {
-                        foreground = Draw.path(
-                            `M ${textWidth + x + rx},${(i + 0.5) * barSpacing + i * barHeight} a ${rx},${ry} 0 0 0 0,${barHeight} h ${(barWidth * value) - rx} v ${-barHeight} z`,
-                            this.foregroundColors[j % this.foregroundColors.length]
-                        );
-                    }
-                } else if (x + barWidth * value === barWidth || j === this.data.datasets.length - 1) { // Last element
-                    if(width - rx  < 0) { // bar to short to form circle
-                        foreground = Draw.path(
-                            `M ${textWidth + x}, ${(i + 0.5) * barSpacing + i * barHeight} c ${width/0.75} ${barHeight * steepness}, ${width/0.75} ${barHeight * (1-steepness)}, 0 ${barHeight} z`,
-                            this.foregroundColors[j % this.foregroundColors.length]
-                        );
-                    } else {
-                        foreground = Draw.path(
-                            `M ${textWidth + x},${(i + 0.5) * barSpacing + i * barHeight} v ${barHeight} h ${(barWidth * value) - rx} a ${rx},${ry} 0 0 0 0,${-barHeight} z`,
-                            this.foregroundColors[j % this.foregroundColors.length]
-                        );
-                    }
-                } else { // element in the middle
-                    foreground = Draw.path(
-                        `M ${textWidth + x}, ${(i + 0.5) * barSpacing + i * barHeight} v ${barHeight} h ${barWidth * value} v ${-barHeight} z`,
+
+                if(width > 0 && x < barWidth) {
+                    const foreground = Draw.path(
+                        createHorizontalBar(textWidth, (i + 0.5) * barSpacing + i * barHeight, rx, ry, width, x, barWidth),
                         this.foregroundColors[j % this.foregroundColors.length]
                     );
-                }
 
-                if (this.hover) {
-                    foreground.addEventListener('mouseenter', evt => { this.showTooltip(true, foreground, value, title) });
-                    foreground.addEventListener("mouseleave", evt => { this.showTooltip(false) });
-                }
-
-                if (x < barWidth) { // only draw the part if it would not overshoot
-                    this.svg.appendChild(foreground);
-                }
-
-                x = x + barWidth * value;
+                    if (this.hover) {
+                        foreground.addEventListener('mouseenter', evt => { this.showTooltip(true, foreground, value, title) });
+                        foreground.addEventListener("mouseleave", evt => { this.showTooltip(false) });
+                    }
+    
+                    if (x < barWidth) { // only draw the part if it would not overshoot
+                        this.svg.appendChild(foreground);
+                    }
+    
+                    x = x + barWidth * value;
+                }     
             }
 
             const text = Draw.text(0, (i + 0.5) * (barSpacing + barHeight), label, this.textColor, this.font, { "text-anchor": "start", "alignment-baseline": "central" });
@@ -673,7 +842,7 @@ class Timeline {
         this.textColor = params.colors.text;
 
         this.draw();
-        if(typeof ResizeObserver === "function") {
+        if (typeof ResizeObserver === "function") {
             const ro = new ResizeObserver(entries => {
                 this.draw();
             });
@@ -703,7 +872,7 @@ class Timeline {
         const legendHeight = this.legend ? lineHeight : 0;
         const legendSpacing = this.legend ? this.legendDistance : 0;
 
-        if(this.adjustSize) {
+        if (this.adjustSize) {
             const height = scaleHeight + legendHeight + legendSpacing + lineCount * (lineHeight + this.distance) + this.padding.top + this.padding.bottom;
             this.container.style.height = `${height}px`;
         }
@@ -789,34 +958,34 @@ class Timeline {
                 const width = (lineWidth * (relativeLength - relativeStart));
 
                 const polarToCartesian = (centerX, centerY, radius, angleInDegrees) => {
-                    const angleInRadians = (angleInDegrees-90) * Math.PI / 180.0;
-                  
+                    const angleInRadians = (angleInDegrees - 90) * Math.PI / 180.0;
+
                     return {
-                      x: centerX + (radius * Math.cos(angleInRadians)),
-                      y: centerY + (radius * Math.sin(angleInRadians))
+                        x: centerX + (radius * Math.cos(angleInRadians)),
+                        y: centerY + (radius * Math.sin(angleInRadians))
                     };
                 }
 
                 const partialCircle = (x, y, radius, startAngle, endAngle) => {
-                  
-                      const start = polarToCartesian(x, y, radius, endAngle);
-                      const end = polarToCartesian(x, y, radius, startAngle);
-                  
-                      const largeArcFlag = endAngle - startAngle <= 180 ? "0" : "1";
-                  
-                      const d = [
-                          "M", start.x, start.y, 
-                          "A", radius, radius, 0, largeArcFlag, 0, end.x, end.y,
-                          "L", 
-                      ].join(" ");
-                  
-                      return d;       
-                  }
+
+                    const start = polarToCartesian(x, y, radius, endAngle);
+                    const end = polarToCartesian(x, y, radius, startAngle);
+
+                    const largeArcFlag = endAngle - startAngle <= 180 ? "0" : "1";
+
+                    const d = [
+                        "M", start.x, start.y,
+                        "A", radius, radius, 0, largeArcFlag, 0, end.x, end.y,
+                        "L",
+                    ].join(" ");
+
+                    return d;
+                }
                 const steepness = 0.05; // The smaller, the rounder
 
-                if(width - rx * 2 < 0) { // bar to short to form circle
+                if (width - rx * 2 < 0) { // bar to short to form circle
                     foreground = Draw.path(
-                        `M ${widthLeft + lineWidth * relativeStart + width/2}, ${scaleStart + scaleHeight + i * (lineSpacing + lineHeight)} c ${-(width/2 / 0.75)} ${lineHeight * steepness}, ${-(width/2 / 0.75)} ${lineHeight * (1-steepness)}, 0 ${lineHeight} v ${-lineHeight} c ${width/2/0.75} ${lineHeight * steepness}, ${width/2/0.75} ${lineHeight * (1-steepness)}, 0 ${lineHeight} z`,
+                        `M ${widthLeft + lineWidth * relativeStart + width / 2}, ${scaleStart + scaleHeight + i * (lineSpacing + lineHeight)} c ${-(width / 2 / 0.75)} ${lineHeight * steepness}, ${-(width / 2 / 0.75)} ${lineHeight * (1 - steepness)}, 0 ${lineHeight} v ${-lineHeight} c ${width / 2 / 0.75} ${lineHeight * steepness}, ${width / 2 / 0.75} ${lineHeight * (1 - steepness)}, 0 ${lineHeight} z`,
                         color
                     );
                 } else {
