@@ -461,7 +461,9 @@ class Barchart {
      * @param {string} [params.colors.text = "black"] - the color of the text.
      * @param {'vertical' | 'horizontal'} [params.orientation = 'vertical'] - orientation for the chart.
      * @param {string} [params.font = 'Roboto'] - the font for all writing. Font must be imported separately.
-     * @param {boolean} [params.hover = true] - whether the titles should be shown on hover or not.
+     * @param {Object} [params.hover] - options for the hover effect.
+     * @param {boolean} [params.hover.visible = true] - whether the titles should be shown on hover or not.
+     * @param {Function} [params.hover.callback] - function that returns html that is displayed in the hover effect. Receives (title, value).
      * @param {'variable' | number} [params.distance = 'variable'] - whether the distance between timelines should be variable (based on svg size) or a fixed number of px.
      * @param {boolean} [params.adjustSize = false] - whether the size of the container should be adjusted based on the needed space. Only works if params.distance != 'variable'.
      * @throws Will throw an error if the container element is not found.
@@ -492,7 +494,10 @@ class Barchart {
             },
             orientation: "vertical",
             font: "Roboto",
-            hover: true,
+            hover: {
+                visible: true,
+                callback: (title, value) => `<span style="color: gray">${value}</span>${title !== "" ? ": " + title : ""}`
+            },
             barSize: 25,
             distance: 'variable',
             adjustSize: false
@@ -558,6 +563,12 @@ class Barchart {
         const viewboxWidthScale = realWidth / 100;
         const barSpacing = this.distance === 'variable' ? (100 * viewboxWidthScale) / barCount - barWidth : this.distance;
 
+        // Find max value
+        let max = 0
+        for(let i = 0; i < barCount; i++) {
+            max = Math.max(max, this.data.datasets.reduce((p, c) => c.values.length > i ? p + c.values[i] : p, 0));
+        }
+
         this.svg = Draw.svg(`calc(100% - ${this.padding.right + this.padding.left}px)`, `calc(100% - ${this.padding.top + this.padding.bottom}px)`, 100 * viewboxWidthScale, 100);
 
         // Padding
@@ -586,14 +597,14 @@ class Barchart {
                 const value = this.data.datasets[j].values[i] || 0;
                 const title = this.data.datasets[j].title || "";
 
-                const height = (barHeight * value);
+                const height = (barHeight * value / max);
                 if(height > 0 && y < barHeight) {
                     const foreground = Draw.path(
                         createVerticalBar((i + 0.5) * barSpacing + i * barWidth, barHeight, rx, ry, height, y, barHeight),
                         this.foregroundColors[j % this.foregroundColors.length]
                     );
 
-                    if (this.hover) {
+                    if (this.hover.visible) {
                         foreground.addEventListener('mouseenter', evt => { this.showTooltip(true, foreground, value, title) });
                         foreground.addEventListener("mouseleave", evt => { this.showTooltip(false) });
                     }
@@ -637,6 +648,12 @@ class Barchart {
         const viewboxHeightScale = realHeight / 100;
         const barSpacing = this.distance === 'variable' ? (100 * viewboxHeightScale) / barCount - barHeight : this.distance;
 
+        // Find max value
+        let max = 0
+        for(let i = 0; i < barCount; i++) {
+            max = Math.max(max, this.data.datasets.reduce((p, c) => c.values.length > i ? p + c.values[i] : p, 0));
+        }
+  
         this.svg = Draw.svg(`calc(100% - ${this.padding.right + this.padding.left}px)`, `calc(100% - ${this.padding.top + this.padding.bottom}px)`, 100, 100 * viewboxHeightScale);
 
         // Padding
@@ -665,7 +682,7 @@ class Barchart {
                 const value = this.data.datasets[j].values[i] || 0;
                 const title = this.data.datasets[j].title || "";
 
-                const width = (barWidth * value);
+                const width = (barWidth * value / max);
 
                 if(width > 0 && x < barWidth) {
                     const foreground = Draw.path(
@@ -673,7 +690,7 @@ class Barchart {
                         this.foregroundColors[j % this.foregroundColors.length]
                     );
 
-                    if (this.hover) {
+                    if (this.hover.visible) {
                         foreground.addEventListener('mouseenter', evt => { this.showTooltip(true, foreground, value, title) });
                         foreground.addEventListener("mouseleave", evt => { this.showTooltip(false) });
                     }
@@ -721,7 +738,7 @@ class Barchart {
         }
 
         clear(this.tooltip);
-        this.tooltip.innerHTML = `<span style="color: gray">${value}</span>${title !== "" ? ": " + title : ""}`;
+        this.tooltip.innerHTML = this.hover.callback(title, value);
         this.tooltip.style.top = g.getBoundingClientRect().y - 43 + "px";
         this.tooltip.style.left = `calc(${g.getBoundingClientRect().x + g.getBoundingClientRect().width / 2 - this.tooltip.getBoundingClientRect().width / 2}px)`;
         this.tooltip.style.visibility = "visible";
@@ -778,7 +795,9 @@ class Timeline {
      * @param {string} [params.colors.background = "#E3E6E9"] - the color of the background of the bars (not the color of background of the whole chart).
      * @param {string} [params.colors.text = "black"] - the color of the text.
      * @param {string} [params.font = 'Roboto'] - the font for all writing. Font must be imported separately.
-     * @param {boolean} [params.hover = true] - whether the titles should be shown on hover or not.
+     * @param {Object} [params.hover] - options for the hover effect.
+     * @param {boolean} [params.hover.visible = true] - whether the titles should be shown on hover or not.
+     * @param {Function} [params.hover.callback] - function that returns html that is displayed in the hover effect. Receives (title, start, end).
      * @param {Object} [params.legend] - options for the legend.
      * @param {boolean} [params.legend.visible = true] - whether a legend should be shown underneath the timelines.
      * @param {number} [params.legend.distance = 15] - distance from the last timeline to the legend in px. Always set to 0 if params.legend.visible === false.
@@ -816,7 +835,10 @@ class Timeline {
                 text: "black"
             },
             font: "Roboto",
-            hover: true,
+            hover: {
+                visible: true,
+                callback: (title, start, end) => `<span style="color: gray">${this.formatMinutes2(start)} - ${this.formatMinutes2(end)}</span>${title !== "" ? ": " + title : ""}`
+            },
             legend: {
                 visible: true,
                 distance: 15,
@@ -996,7 +1018,7 @@ class Timeline {
                 }
                 this.svg.appendChild(foreground);
 
-                if (this.hover) {
+                if (this.hover.visible) {
                     foreground.addEventListener('mouseenter', evt => { this.showTooltip(true, foreground, values[j].start, values[j].start + values[j].length, title) });
                     foreground.addEventListener("mouseleave", evt => { this.showTooltip(false) });
                 }
@@ -1109,7 +1131,7 @@ class Timeline {
 
         this.tooltip.style.top = g.getBoundingClientRect().y - 43 + "px";
         clear(this.tooltip);
-        this.tooltip.innerHTML = `<span style="color: gray">${this.formatMinutes2(start)} - ${this.formatMinutes2(end)}</span>${title !== "" ? ": " + title : ""}`;
+        this.tooltip.innerHTML = this.hover.callback(title, start, end);
         this.tooltip.style.left = `calc(${g.getBoundingClientRect().x + g.getBoundingClientRect().width / 2 - this.tooltip.getBoundingClientRect().width / 2}px)`;
         this.tooltip.style.visibility = "visible";
     }

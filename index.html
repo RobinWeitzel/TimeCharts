@@ -22,20 +22,24 @@
                 labels: ["Work", "Study"],
                 datasets: [
                     {
-                        values: [0.394],
+                        values: [2],
                         title: "test"
                     },
                     {
-                        values: [0.595]
+                        values: [4],
+                        title: "test2"
                     }
                 ],
             },  
-            orientation: "horizontal",
+            orientation: "vertical",
             padding: {
                 top: 50, 
                 left: 50,
                 right: 50,
                 bottom:50
+            },
+            hover: {
+                callback: (t, v) => v
             }
         });
         
