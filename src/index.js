@@ -108,11 +108,11 @@ function describeArc(x, y, radiusX, radiusY, startAngle, endAngle, outerArc) {
  */
 function createTopArc(x, y, radiusX, radiusY, heightDelta, heightOld) {
     // Calculate degrees
-    const alphaOld = Math.acos((radiusY - heightOld) / radiusY) / Math.PI * 180;
-    const alphaNew = Math.acos((radiusY - (heightOld + heightDelta)) / radiusY)  / Math.PI * 180;
+    const alphaOld = Math.asin((radiusY - heightOld) / radiusY) / Math.PI * 180;
+    const alphaNew = Math.asin((radiusY - (heightOld + heightDelta)) / radiusY)  / Math.PI * 180;
     
-    const arc1 = describeArc(x, y, radiusX, radiusY, alphaOld, alphaNew, 0);
-    const arc2 = describeArc(x, y, radiusX, radiusY, 360-alphaOld, 360-alphaNew, 1);
+    const arc1 = describeArc(x, y, radiusX, radiusY, alphaOld, alphaNew, 1);
+    const arc2 = describeArc(x, y, radiusX, radiusY, 360-alphaOld, 360-alphaNew, 0);
   
     const d = [
         arc1[0],
@@ -135,11 +135,11 @@ function createTopArc(x, y, radiusX, radiusY, heightDelta, heightOld) {
  */
 function createRightArc(x, y, radiusX, radiusY, widthDelta, widthOld) {
     // Calculate degrees
-    const alphaOld = Math.acos((radiusX - widthOld) / radiusX) / Math.PI * 180;
-    const alphaNew = Math.acos((radiusX - (widthOld + widthDelta)) / radiusX)  / Math.PI * 180;
+    const alphaOld = Math.asin((radiusX - widthOld) / radiusX) / Math.PI * 180;
+    const alphaNew = Math.asin((radiusX - (widthOld + widthDelta)) / radiusX)  / Math.PI * 180;
     
-    const arc1 = describeArc(x, y, radiusX, radiusY, 90+alphaOld, 90+alphaNew, 0);
-    const arc2 = describeArc(x, y, radiusX, radiusY, 90+360-alphaOld, 90+360-alphaNew, 1);
+    const arc1 = describeArc(x, y, radiusX, radiusY, 90+alphaOld, 90+alphaNew, 1);
+    const arc2 = describeArc(x, y, radiusX, radiusY, 90+360-alphaOld, 90+360-alphaNew, 0);
   
     const d = [
         arc1[0],
