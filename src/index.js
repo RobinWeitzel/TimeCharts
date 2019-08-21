@@ -458,6 +458,7 @@ class Barchart {
      * @param {number|string} [params.padding.left] - left padding for the chart.
      * @param {Object} [params.colors] - custom colors
      * @param {string[]} [params.colors.foreground = ['#7cd6fd', '#5e64ff', '#743ee2', '#ff5858', '#ffa00a', '#feef72', '#28a745', '#98d85b', '#b554ff', '#ffa3ef', '#36114C', '#bdd3e6', '#f0f4f7', '#b8c2cc']] - the colors for each bar.
+     * @param {boolean} [params.colors.fixToTitle = true] - Whether bar-portions with the same title should also have the same color.
      * @param {string} [params.colors.background = "#E3E6E9"] - the color of the background of the bars (not the color of background of the whole chart).
      * @param {string} [params.colors.text = "black"] - the color of the text.
      * @param {'vertical' | 'horizontal'} [params.orientation = 'vertical'] - orientation for the chart.
@@ -487,6 +488,7 @@ class Barchart {
             },
             colors: {
                 foreground: ['#7cd6fd', '#5e64ff', '#743ee2', '#ff5858', '#ffa00a', '#feef72', '#28a745', '#98d85b', '#b554ff', '#ffa3ef', '#36114C', '#bdd3e6', '#f0f4f7', '#b8c2cc'],
+                fixToTitle: true,
                 background: "#E3E6E9",
                 text: "black"
             },
@@ -506,6 +508,7 @@ class Barchart {
         this.padding = params.padding;
         this.max = params.max;
         this.foregroundColors = params.colors.foreground;
+        this.fixColorToTitle = params.colors.fixToTitle;
         this.backgroundColor = params.colors.background;
         this.textColor = params.colors.text;
         this.orientation = params.orientation;
@@ -571,6 +574,8 @@ class Barchart {
             max = this.max;
         }
 
+        const valueMap = {};
+
         this.svg = Draw.svg(`calc(100% - ${this.padding.right + this.padding.left}px)`, `calc(100% - ${this.padding.top + this.padding.bottom}px)`, 100 * viewboxWidthScale, 100);
 
         // Padding
@@ -599,11 +604,24 @@ class Barchart {
                 const value = this.data[i].datasets[j].value || 0;
                 const title = this.data[i].datasets[j].title || "";
 
+                let color = "";
+
+                if(this.fixColorToTitle){
+                    if (!(title in valueMap)) { // sub-category has not be encountered before
+                        color = this.foregroundColors[Object.keys(valueMap).length % this.foregroundColors.length];
+                        valueMap[title] = color;
+                    } else {
+                        color = valueMap[title];
+                    }
+                } else {
+                    color = this.foregroundColors[j % this.foregroundColors.length];
+                }
+
                 const height = (barHeight * value / max);
                 if(height > 0 && y < barHeight) {
                     const foreground = Draw.path(
                         createVerticalBar((i + 0.5) * barSpacing + i * barWidth, barHeight, rx, ry, height, y, barHeight),
-                        this.foregroundColors[j % this.foregroundColors.length]
+                        color
                     );
 
                     if (this.hover.visible) {
@@ -657,6 +675,8 @@ class Barchart {
         } else {
             max = this.max;
         }
+
+        const valueMap = {};
   
         this.svg = Draw.svg(`calc(100% - ${this.padding.right + this.padding.left}px)`, `calc(100% - ${this.padding.top + this.padding.bottom}px)`, 100, 100 * viewboxHeightScale);
 
@@ -686,12 +706,25 @@ class Barchart {
                 const value = this.data[i].datasets[j].value || 0;
                 const title = this.data[i].datasets[j].title || "";
 
+                let color = "";
+
+                if(this.fixColorToTitle){
+                    if (!(title in valueMap)) { // sub-category has not be encountered before
+                        color = this.foregroundColors[Object.keys(valueMap).length % this.foregroundColors.length];
+                        valueMap[title] = color;
+                    } else {
+                        color = valueMap[title];
+                    }
+                } else {
+                    color = this.foregroundColors[j % this.foregroundColors.length];
+                }
+
                 const width = (barWidth * value / max);
 
                 if(width > 0 && x < barWidth) {
                     const foreground = Draw.path(
                         createHorizontalBar(textWidth, (i + 0.5) * barSpacing + i * barHeight, rx, ry, width, x, barWidth),
-                        this.foregroundColors[j % this.foregroundColors.length]
+                        color
                     );
 
                     if (this.hover.visible) {
