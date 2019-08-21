@@ -12,7 +12,7 @@
   <a href="#license">License</a>
 </p>
 
-![screenshot](readme/image2.PNG)
+![screenshot](https://raw.githubusercontent.com/RobinWeitzel/TimeCharts/master/readme/image2.PNG)
 
 ## Key Features
 

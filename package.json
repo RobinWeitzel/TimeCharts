@@ -6,7 +6,8 @@
   "unpkg": "dist/TimeCharts.min.js",
   "scripts": {
     "prod": "webpack --mode production",
-    "dev": "webpack --mode development"
+    "dev": "webpack --mode development",
+    "docs": "jsdoc ./src/index.js README.md -t ./node_modules/better-docs -d ./docs"
   },
   "engines": {
     "node": ">=7.8.0"
