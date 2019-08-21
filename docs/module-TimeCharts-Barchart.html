@@ -63,7 +63,7 @@
 <header>
     
         <h2><span class="attribs"><span class="type-signature"></span></span>
-            <span class="ancestors"><a href="module-TimeCharts.html">TimeCharts</a>~</span>Barchart<span class="signature">(element, params<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span></h2>
+            <span class="ancestors"><a href="module-TimeCharts.html">TimeCharts</a>~</span>Barchart<span class="signature">(element, params<span class="signature-attributes">opt</span>, max<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span></h2>
         
             <div class="class-description">Creates a bar chart</div>
         
@@ -83,7 +83,7 @@
     <h4 class="name" id="Barchart">
         
         <span class="code-name">
-            new Barchart<span class="signature">(element, params<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span>
+            new Barchart<span class="signature">(element, params<span class="signature-attributes">opt</span>, max<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span>
         </span>
     </h4>
     
@@ -253,80 +253,6 @@
   <td class="type">
   
       
-<span class="param-type">array</span>
-
-
-  
-  </td>
-
-  
-      <td class="attributes">
-      
-          &lt;optional><br>
-      
-
-      
-
-      
-      </td>
-  
-
-  
-      <td class="default">
-      
-      </td>
-  
-
-  <td class="description last">the data to be displayed.</td>
-</tr>
-
-  
-    
-<tr class="deep-level-1">
-  
-      <td class="name"><code>data.labels</code></td>
-  
-
-  <td class="type">
-  
-      
-<span class="param-type">Array.&lt;string></span>
-
-
-  
-  </td>
-
-  
-      <td class="attributes">
-      
-          &lt;optional><br>
-      
-
-      
-
-      
-      </td>
-  
-
-  
-      <td class="default">
-      
-      </td>
-  
-
-  <td class="description last">the labels underneath each bar.</td>
-</tr>
-
-  
-    
-<tr class="deep-level-1">
-  
-      <td class="name"><code>data.datasets</code></td>
-  
-
-  <td class="type">
-  
-      
 <span class="param-type">Array.&lt;Object></span>
 
 
@@ -351,49 +277,14 @@
       </td>
   
 
-  <td class="description last">each dataset represents one "block" of a bar. To create a stacked bar chart have multiple datasets.</td>
+  <td class="description last">the data to be displayed. A list of bars that make up the bar chart.</td>
 </tr>
 
   
     
 <tr class="deep-level-1">
   
-      <td class="name"><code>data.datasets[].values</code></td>
-  
-
-  <td class="type">
-  
-      
-<span class="param-type">Array.&lt;number></span>
-
-
-  
-  </td>
-
-  
-      <td class="attributes">
-      
-
-      
-
-      
-      </td>
-  
-
-  
-      <td class="default">
-      
-      </td>
-  
-
-  <td class="description last">the values for each "block" of a bar. Should be between 0 and 1.</td>
-</tr>
-
-  
-    
-<tr class="deep-level-1">
-  
-      <td class="name"><code>data.datasets[].title</code></td>
+      <td class="name"><code>data[].label</code></td>
   
 
   <td class="type">
@@ -423,14 +314,171 @@
       </td>
   
 
-  <td class="description last">the title for the dataset.</td>
+  <td class="description last">the labels underneath the bar.</td>
 </tr>
 
   
     
 <tr class="deep-level-1">
   
-      <td class="name"><code>padding</code></td>
+      <td class="name"><code>data[].datasets</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type">Array.&lt;Object></span>
+
+
+  
+  </td>
+
+  
+      <td class="attributes">
+      
+          &lt;optional><br>
+      
+
+      
+
+      
+      </td>
+  
+
+  
+      <td class="default">
+      
+      </td>
+  
+
+  <td class="description last">each dataset represents one "block" of a bar.</td>
+</tr>
+
+  
+    
+<tr class="deep-level-1">
+  
+      <td class="name"><code>data[].datasets[].value</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type">number</span>
+
+
+  
+  </td>
+
+  
+      <td class="attributes">
+      
+
+      
+
+      
+      </td>
+  
+
+  
+      <td class="default">
+      
+      </td>
+  
+
+  <td class="description last">the value of the block.</td>
+</tr>
+
+  
+    
+<tr class="deep-level-1">
+  
+      <td class="name"><code>data[].datasets[].title</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type">string</span>
+
+
+  
+  </td>
+
+  
+      <td class="attributes">
+      
+          &lt;optional><br>
+      
+
+      
+
+      
+      </td>
+  
+
+  
+      <td class="default">
+      
+      </td>
+  
+
+  <td class="description last">the title of the block.</td>
+</tr>
+
+  
+
+
+    
+
+        
+<tr class="deep-level-0">
+  
+      <td class="name"><code>max</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type">number</span>
+|
+
+<span class="param-type">string</span>
+
+
+  
+  </td>
+
+  
+      <td class="attributes">
+      
+          &lt;optional><br>
+      
+
+      
+
+      
+      </td>
+  
+
+  
+      <td class="default">
+      
+          'relative'
+      
+      </td>
+  
+
+  <td class="description last">the max value of the chart.</td>
+</tr>
+
+
+    
+
+        
+<tr class="deep-level-0">
+  
+      <td class="name"><code>params.padding</code></td>
   
 
   <td class="type">
@@ -464,10 +512,11 @@
 </tr>
 
   
+  
     
 <tr class="deep-level-1">
   
-      <td class="name"><code>padding.top</code></td>
+      <td class="name"><code>top</code></td>
   
 
   <td class="type">
@@ -507,7 +556,7 @@
     
 <tr class="deep-level-1">
   
-      <td class="name"><code>padding.right</code></td>
+      <td class="name"><code>right</code></td>
   
 
   <td class="type">
@@ -547,7 +596,7 @@
     
 <tr class="deep-level-1">
   
-      <td class="name"><code>padding.bottom</code></td>
+      <td class="name"><code>bottom</code></td>
   
 
   <td class="type">
@@ -587,7 +636,7 @@
     
 <tr class="deep-level-1">
   
-      <td class="name"><code>padding.left</code></td>
+      <td class="name"><code>left</code></td>
   
 
   <td class="type">
@@ -624,10 +673,14 @@
 </tr>
 
   
+
+
     
-<tr class="deep-level-1">
+
+        
+<tr class="deep-level-0">
   
-      <td class="name"><code>colors</code></td>
+      <td class="name"><code>params.colors</code></td>
   
 
   <td class="type">
@@ -661,10 +714,11 @@
 </tr>
 
   
+  
     
 <tr class="deep-level-1">
   
-      <td class="name"><code>colors.foreground</code></td>
+      <td class="name"><code>foreground</code></td>
   
 
   <td class="type">
@@ -703,7 +757,7 @@
     
 <tr class="deep-level-1">
   
-      <td class="name"><code>colors.background</code></td>
+      <td class="name"><code>background</code></td>
   
 
   <td class="type">
@@ -742,7 +796,7 @@
     
 <tr class="deep-level-1">
   
-      <td class="name"><code>colors.text</code></td>
+      <td class="name"><code>text</code></td>
   
 
   <td class="type">
@@ -778,10 +832,14 @@
 </tr>
 
   
+
+
     
-<tr class="deep-level-1">
+
+        
+<tr class="deep-level-0">
   
-      <td class="name"><code>orientation</code></td>
+      <td class="name"><code>params.orientation</code></td>
   
 
   <td class="type">
@@ -819,11 +877,13 @@
   <td class="description last">orientation for the chart.</td>
 </tr>
 
-  
+
     
-<tr class="deep-level-1">
+
+        
+<tr class="deep-level-0">
   
-      <td class="name"><code>font</code></td>
+      <td class="name"><code>params.font</code></td>
   
 
   <td class="type">
@@ -858,11 +918,13 @@
   <td class="description last">the font for all writing. Font must be imported separately.</td>
 </tr>
 
-  
+
     
-<tr class="deep-level-1">
+
+        
+<tr class="deep-level-0">
   
-      <td class="name"><code>hover</code></td>
+      <td class="name"><code>params.hover</code></td>
   
 
   <td class="type">
@@ -896,10 +958,11 @@
 </tr>
 
   
+  
     
 <tr class="deep-level-1">
   
-      <td class="name"><code>hover.visible</code></td>
+      <td class="name"><code>visible</code></td>
   
 
   <td class="type">
@@ -938,7 +1001,7 @@
     
 <tr class="deep-level-1">
   
-      <td class="name"><code>hover.callback</code></td>
+      <td class="name"><code>callback</code></td>
   
 
   <td class="type">
@@ -972,10 +1035,14 @@
 </tr>
 
   
+
+
     
-<tr class="deep-level-1">
+
+        
+<tr class="deep-level-0">
   
-      <td class="name"><code>distance</code></td>
+      <td class="name"><code>params.distance</code></td>
   
 
   <td class="type">
@@ -1013,11 +1080,13 @@
   <td class="description last">whether the distance between timelines should be variable (based on svg size) or a fixed number of px.</td>
 </tr>
 
-  
+
     
-<tr class="deep-level-1">
+
+        
+<tr class="deep-level-0">
   
-      <td class="name"><code>adjustSize</code></td>
+      <td class="name"><code>params.adjustSize</code></td>
   
 
   <td class="type">
@@ -1051,8 +1120,6 @@
 
   <td class="description last">whether the size of the container should be adjusted based on the needed space. Only works if params.distance != 'variable'.</td>
 </tr>
-
-  
 
 
     
@@ -1098,7 +1165,7 @@
         <p class="tag-source">
             <a href="index.js.html" class="button">View Source</a>
             <span>
-                <a href="index.js.html">index.js</a>, <a href="index.js.html#line471">line 471</a>
+                <a href="index.js.html">index.js</a>, <a href="index.js.html#line472">line 472</a>
             </span>
         </p>
     
@@ -1427,7 +1494,7 @@
         <p class="tag-source">
             <a href="index.js.html" class="button">View Source</a>
             <span>
-                <a href="index.js.html">index.js</a>, <a href="index.js.html#line755">line 755</a>
+                <a href="index.js.html">index.js</a>, <a href="index.js.html#line759">line 759</a>
             </span>
         </p>
     
@@ -1476,7 +1543,7 @@
 
 <footer class="footer">
     <div class="content has-text-centered">
-        <p>Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.3</a> on Wed Aug 21 2019 16:45:53 GMT+0200 (GMT+02:00)</p>
+        <p>Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.3</a> on Wed Aug 21 2019 17:31:40 GMT+0200 (GMT+02:00)</p>
         <p class="sidebar-created-by">
             <a href="https://github.com/SoftwareBrothers/better-docs" target="_blank">BetterDocs theme</a> provided with <i class="fas fa-heart"></i> by 
             <a href="http://softwarebrothers.co" target="_blank">SoftwareBrothers</a>

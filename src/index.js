@@ -445,11 +445,12 @@ class Barchart {
      * @param {string} element - css query selector of the container dom element into which the chart is placed.
      * @param {Object} [params] - options
      * @param {Object} [params.barSize = 25] - the size of a bar in px.
-     * @param {array} [params.data] - the data to be displayed.
-     * @param {string[]} [params.data.labels] - the labels underneath each bar.
-     * @param {Object[]} [params.data.datasets] - each dataset represents one "block" of a bar. To create a stacked bar chart have multiple datasets.
-     * @param {number[]} params.data.datasets[].values - the values for each "block" of a bar. Should be between 0 and 1. 
-     * @param {string} [params.data.datasets[].title] - the title for the dataset.
+     * @param {Object[]} [params.data] - the data to be displayed. A list of bars that make up the bar chart.
+     * @param {string} [params.data[].label] - the labels underneath the bar.
+     * @param {Object[]} [params.data[].datasets] - each dataset represents one "block" of a bar.
+     * @param {number} params.data[].datasets[].value - the value of the block.
+     * @param {string} [params.data[].datasets[].title] - the title of the block.
+     * @param {number|string} [max = 'relative'] - the max value of the chart.
      * @param {Object} [params.padding] - padding in all directions of the chart.
      * @param {number|string} [params.padding.top] - top padding for the chart.
      * @param {number|string} [params.padding.right] - right padding for the chart.
@@ -477,10 +478,7 @@ class Barchart {
 
         // Extract parameters and sets defaults if parameters not available
         mergeObjects(params, {
-            data: {
-                labels: [],
-                datasets: []
-            },
+            data: [],
             padding: {
                 top: 0,
                 right: 0,
@@ -500,11 +498,13 @@ class Barchart {
             },
             barSize: 25,
             distance: 'variable',
-            adjustSize: false
+            adjustSize: false,
+            max: 'relative'
         });
 
         this.data = params.data;
         this.padding = params.padding;
+        this.max = params.max;
         this.foregroundColors = params.colors.foreground;
         this.backgroundColor = params.colors.background;
         this.textColor = params.colors.text;
@@ -550,7 +550,7 @@ class Barchart {
     drawVertical() {
         const realHeight = this.container.clientHeight - this.padding.top - this.padding.bottom;
         const viewboxHeightScale = 100 / realHeight;
-        const barCount = this.data.datasets.reduce((p, c) => Math.max(p, c.values.length), 0);
+        const barCount = this.data.length;
         const barWidth = this.barSize;
         const barHeight = 100 - 25 * viewboxHeightScale;
 
@@ -565,8 +565,10 @@ class Barchart {
 
         // Find max value
         let max = 0
-        for(let i = 0; i < barCount; i++) {
-            max = Math.max(max, this.data.datasets.reduce((p, c) => c.values.length > i ? p + c.values[i] : p, 0));
+        if(this.max === 'relative') {
+            max = this.data.reduce((p, c) => Math.max(p, c.datasets.reduce((p, c) => p + c.value, 0)), 0);
+        } else {
+            max = this.max;
         }
 
         this.svg = Draw.svg(`calc(100% - ${this.padding.right + this.padding.left}px)`, `calc(100% - ${this.padding.top + this.padding.bottom}px)`, 100 * viewboxWidthScale, 100);
@@ -580,7 +582,7 @@ class Barchart {
 
         // Draw data
         for (let i = 0; i < barCount; i++) {
-            const label = this.data.labels[i] || "";
+            const label = this.data[i].label || "";
 
             const rx = barWidth / 2;
             const ry = barWidth / 2 * viewboxHeightScale;
@@ -593,9 +595,9 @@ class Barchart {
 
             let y = 0; // height of the bar. Contains the position at which to draw the next rectangle
 
-            for (let j = 0; j < this.data.datasets.length; j++) {
-                const value = this.data.datasets[j].values[i] || 0;
-                const title = this.data.datasets[j].title || "";
+            for (let j = 0; j < this.data[i].datasets.length; j++) {
+                const value = this.data[i].datasets[j].value || 0;
+                const title = this.data[i].datasets[j].title || "";
 
                 const height = (barHeight * value / max);
                 if(height > 0 && y < barHeight) {
@@ -634,8 +636,8 @@ class Barchart {
     drawHorizontal() {
         const realWidth = this.container.clientWidth - this.padding.right - this.padding.left;
         const viewboxWidthScale = 100 / realWidth;
-        const barCount = this.data.datasets.reduce((p, c) => Math.max(p, c.values.length), 0);
-        const textWidth = this.data.labels.reduce((p, c) => Math.max(p, c.length > 0 ? (2 + c.length * 7.5) * viewboxWidthScale : 0), 0); // 7.5 per char 
+        const barCount = this.data.length;
+        const textWidth = this.data.reduce((p, c) => Math.max(p, c.label !== undefined && c.label.length > 0 ? (2 + c.label.length * 7.5) * viewboxWidthScale : 0), 0); // 7.5 per char 
         const barWidth = 100 - textWidth;
         const barHeight = this.barSize;
 
@@ -650,8 +652,10 @@ class Barchart {
 
         // Find max value
         let max = 0
-        for(let i = 0; i < barCount; i++) {
-            max = Math.max(max, this.data.datasets.reduce((p, c) => c.values.length > i ? p + c.values[i] : p, 0));
+        if(this.max === 'relative') {
+            max = this.data.reduce((p, c) => Math.max(p, c.datasets.reduce((p, c) => p + c.value, 0)), 0);
+        } else {
+            max = this.max;
         }
   
         this.svg = Draw.svg(`calc(100% - ${this.padding.right + this.padding.left}px)`, `calc(100% - ${this.padding.top + this.padding.bottom}px)`, 100, 100 * viewboxHeightScale);
@@ -665,7 +669,7 @@ class Barchart {
 
         // Draw data
         for (let i = 0; i < barCount; i++) {
-            const label = this.data.labels[i] || "";
+            const label = this.data[i].label || "";
 
             const rx = barHeight / 2 * viewboxWidthScale;
             const ry = barHeight / 2;
@@ -678,9 +682,9 @@ class Barchart {
 
             let x = 0; // width of the bar. Contains the position at which to draw the next rectangle
 
-            for (let j = 0; j < this.data.datasets.length; j++) {
-                const value = this.data.datasets[j].values[i] || 0;
-                const title = this.data.datasets[j].title || "";
+            for (let j = 0; j < this.data[i].datasets.length; j++) {
+                const value = this.data[i].datasets[j].value || 0;
+                const title = this.data[i].datasets[j].title || "";
 
                 const width = (barWidth * value / max);
 
