@@ -1,13 +1,14 @@
 {
   "name": "timecharts",
-  "version": "1.0.23",
+  "version": "1.0.24",
   "description": "A chart library focusing on visualizing time-related data",
   "main": "dist/TimeCharts.js",
   "unpkg": "dist/TimeCharts.min.js",
   "scripts": {
     "prod": "webpack --mode production",
     "dev": "webpack --mode development",
-    "docs": "jsdoc ./src/index.js README.md -t ./node_modules/better-docs -d ./docs"
+    "docs": "jsdoc ./src/index.js README.md -t ./node_modules/better-docs -d ./docs",
+    "publish": "npm publish --access public"
   },
   "engines": {
     "node": ">=7.8.0"

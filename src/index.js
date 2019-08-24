@@ -720,7 +720,6 @@ class Barchart {
                 }
 
                 const width = (barWidth * value / max);
-
                 if(width > 0 && x < barWidth) {
                     const foreground = Draw.path(
                         createHorizontalBar(textWidth, (i + 0.5) * barSpacing + i * barHeight, rx, ry, width, x, barWidth),
@@ -736,7 +735,7 @@ class Barchart {
                         this.svg.appendChild(foreground);
                     }
     
-                    x = x + barWidth * value;
+                    x = x + width;
                 }     
             }
 
