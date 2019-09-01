@@ -693,8 +693,11 @@ class Barchart {
             this.svg.addEventListener('mousedown',e => startPos = e.clientX);
             this.svg.addEventListener("mousemove", e => {
                 if(startPos) {
-                    const width = -this.dataContainer.getBoundingClientRect().width;
-                    this.dataContainer.style.transform = `translateX(${Math.max(Math.min(currentTranslate + e.clientX - startPos, 0), width)}px)`;
+                    let newPos = currentTranslate + e.clientX - startPos;
+                    newPos = Math.min(0, newPos);
+                    newPos = Math.max(newPos, -((this.scale.visible ? 30 : 0) + 0.5 * barSpacing + this.dataContainer.getBoundingClientRect().width - realWidth));
+
+                    this.dataContainer.style.transform = `translateX(${newPos}px)`;
                 } else {
                     currentTranslate = parseFloat(this.dataContainer.style.transform.replace("translateX(", "").replace("px)", "")) || 0;
                 }
@@ -837,8 +840,11 @@ class Barchart {
             this.svg.addEventListener('mousedown',e => startPos = e.clientY);
             this.svg.addEventListener("mousemove", e => {
                 if(startPos) {
-                    const height = -this.dataContainer.getBoundingClientRect().height;
-                    this.dataContainer.style.transform = `translateY(${Math.max(Math.min(0, currentTranslate + e.clientY - startPos), height)}px)`;
+                    let newPos = currentTranslate + e.clientY - startPos;
+                    newPos = Math.min(0, newPos);
+                    newPos = Math.max(newPos, -((this.scale.visible ? 30 : 0) + 0.5 * barSpacing + this.dataContainer.getBoundingClientRect().height - realHeight));
+
+                    this.dataContainer.style.transform = `translateY(${newPos}px)`;
                 } else {
                     currentTranslate = parseFloat(this.dataContainer.style.transform.replace("translateY(", "").replace("px)", "")) || 0;
                 }
