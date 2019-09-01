@@ -468,6 +468,10 @@ class Barchart {
      * @param {Function} [params.hover.callback] - function that returns html that is displayed in the hover effect. Receives (title, value).
      * @param {'variable' | number} [params.distance = 'variable'] - whether the distance between timelines should be variable (based on svg size) or a fixed number of px.
      * @param {boolean} [params.adjustSize = false] - whether the size of the container should be adjusted based on the needed space. Only works if params.distance != 'variable'.
+     * @param {Object} [scale] - options for the scale
+     * @param {boolean} [scale.visible = true] - whether the scale should be visible or not
+     * @param {number} [scale.interval = 10] - the interval at which to draw the scale
+     * @param {number} [scale.color = "#E3E6E9"] - the color of the scale lines
      * @throws Will throw an error if the container element is not found.
      */
     constructor(element, params) {
@@ -501,7 +505,12 @@ class Barchart {
             barSize: 25,
             distance: 'variable',
             adjustSize: false,
-            max: 'relative'
+            max: 'relative',
+            scale: {
+                visible: true,
+                interval: 10,
+                color: "#E3E6E9"
+            }
         });
 
         this.data = params.data;
@@ -517,6 +526,7 @@ class Barchart {
         this.barSize = params.barSize;
         this.distance = params.distance;
         this.adjustSize = this.distance !== 'variable' && params.adjustSize;
+        this.scale = params.scale;
 
         if (this.orientation !== "horizontal") {
             this.drawVertical();
@@ -564,7 +574,7 @@ class Barchart {
 
         const realWidth = this.container.clientWidth - this.padding.right - this.padding.left;
         const viewboxWidthScale = realWidth / 100;
-        const barSpacing = this.distance === 'variable' ? (100 * viewboxWidthScale) / barCount - barWidth : this.distance;
+        const barSpacing = this.distance === 'variable' ? (100 * viewboxWidthScale - (this.scale.visible ? 30 : 0)) / barCount - barWidth : this.distance;
 
         // Find max value
         let max = 0
@@ -585,6 +595,17 @@ class Barchart {
         this.svg.style.paddingLeft = this.padding.left;
         this.svg.style.boxSizing = "initial";
 
+        // Draw scale
+        if(this.scale.visible) {
+            for(let i = 0; i < Math.floor(barHeight / this.scale.interval); i++) { // Skip the first bar
+                const text = Draw.text(0, barHeight - i * this.scale.interval, i * this.scale.interval, this.textColor, this.font, { "text-anchor": "start", "alignment-baseline": "central" });
+                text.setAttribute("transform", `scale(1,${viewboxHeightScale}) translate(0, ${parseFloat(text.getAttribute("y")) / viewboxHeightScale - parseFloat(text.getAttribute("y"))})`);
+                this.svg.appendChild(text);
+                const line = Draw.rect(30, barHeight - i * this.scale.interval, realWidth, 1 * viewboxHeightScale, this.scale.color);
+                this.svg.appendChild(line);
+            }
+        }
+
         // Draw data
         for (let i = 0; i < barCount; i++) {
             const label = this.data[i].label || "";
@@ -593,7 +614,7 @@ class Barchart {
             const ry = barWidth / 2 * viewboxHeightScale;
 
             const background = Draw.path(
-                `M ${(i + 0.5) * barSpacing + i * barWidth},${0} m 0, ${barHeight - ry} a ${rx},${ry} 0 0 0 ${barWidth},0 v ${ry * 2 - barHeight} a ${rx},${ry} 0 0 0 ${-barWidth},0 z`,
+                `M ${(this.scale.visible ? 30 : 0) + (i + 0.5) * barSpacing + i * barWidth},${0} m 0, ${barHeight - ry} a ${rx},${ry} 0 0 0 ${barWidth},0 v ${ry * 2 - barHeight} a ${rx},${ry} 0 0 0 ${-barWidth},0 z`,
                 this.backgroundColor
             );
             this.svg.appendChild(background);
@@ -620,7 +641,7 @@ class Barchart {
                 const height = (barHeight * value / max);
                 if(height > 0 && y < barHeight) {
                     const foreground = Draw.path(
-                        createVerticalBar((i + 0.5) * barSpacing + i * barWidth, barHeight, rx, ry, height, y, barHeight),
+                        createVerticalBar((this.scale.visible ? 30 : 0) + (i + 0.5) * barSpacing + i * barWidth, barHeight, rx, ry, height, y, barHeight),
                         color
                     );
 
@@ -637,7 +658,7 @@ class Barchart {
                 }
             }
 
-            const text = Draw.text((i + 0.5) * (barSpacing + barWidth), barHeight + (20 * viewboxHeightScale), label, this.textColor, this.font);
+            const text = Draw.text((this.scale.visible ? 30 : 0) + (i + 0.5) * (barSpacing + barWidth), barHeight + (20 * viewboxHeightScale), label, this.textColor, this.font);
             text.setAttribute("transform", `scale(1,${viewboxHeightScale}) translate(0, ${parseFloat(text.getAttribute("y")) / viewboxHeightScale - parseFloat(text.getAttribute("y"))})`);
             this.svg.appendChild(text);
         }
@@ -666,7 +687,7 @@ class Barchart {
 
         const realHeight = this.container.clientHeight - this.padding.top - this.padding.bottom;
         const viewboxHeightScale = realHeight / 100;
-        const barSpacing = this.distance === 'variable' ? (100 * viewboxHeightScale) / barCount - barHeight : this.distance;
+        const barSpacing = this.distance === 'variable' ? (100 * viewboxHeightScale - (this.scale.visible ? 30 : 0)) / barCount - barHeight : this.distance;
 
         // Find max value
         let max = 0
@@ -687,6 +708,18 @@ class Barchart {
         this.svg.style.paddingLeft = this.padding.left;
         this.svg.style.boxSizing = "initial";
 
+        // Draw scale
+        if(this.scale.visible) {
+            for(let i = 0; i < Math.floor(barWidth / this.scale.interval); i++) { // Skip the first bar
+                const text = Draw.text(barWidth - i * this.scale.interval, 20, i * this.scale.interval, this.textColor, this.font, { "text-anchor": "middle" });
+                text.setAttribute("transform", `scale(${viewboxWidthScale},1) translate(${parseFloat(text.getAttribute("x")) / viewboxWidthScale - parseFloat(text.getAttribute("x"))}, 0)`);
+                this.svg.appendChild(text);
+
+                const line = Draw.rect(barWidth - i * this.scale.interval, 30, 1 * viewboxWidthScale, realHeight, this.scale.color);
+                this.svg.appendChild(line);
+            }
+        }
+
         // Draw data
         for (let i = 0; i < barCount; i++) {
             const label = this.data[i].label || "";
@@ -695,7 +728,7 @@ class Barchart {
             const ry = barHeight / 2;
 
             const background = Draw.path(
-                `M ${textWidth + rx}, ${(i + 0.5) * barSpacing + i * barHeight} a ${rx},${ry} 0 0 0 0,${barHeight} h ${barWidth - rx * 2} a ${rx},${ry} 0 0 0 0,${-barHeight} z`,
+                `M ${textWidth + rx}, ${(this.scale.visible ? 30 : 0) + (i + 0.5) * barSpacing + i * barHeight} a ${rx},${ry} 0 0 0 0,${barHeight} h ${barWidth - rx * 2} a ${rx},${ry} 0 0 0 0,${-barHeight} z`,
                 this.backgroundColor
             );
             this.svg.appendChild(background);
@@ -722,7 +755,7 @@ class Barchart {
                 const width = (barWidth * value / max);
                 if(width > 0 && x < barWidth) {
                     const foreground = Draw.path(
-                        createHorizontalBar(textWidth, (i + 0.5) * barSpacing + i * barHeight, rx, ry, width, x, barWidth),
+                        createHorizontalBar(textWidth, (this.scale.visible ? 30 : 0) + (i + 0.5) * barSpacing + i * barHeight, rx, ry, width, x, barWidth),
                         color
                     );
 
@@ -739,7 +772,7 @@ class Barchart {
                 }     
             }
 
-            const text = Draw.text(0, (i + 0.5) * (barSpacing + barHeight), label, this.textColor, this.font, { "text-anchor": "start", "alignment-baseline": "central" });
+            const text = Draw.text(0, (this.scale.visible ? 30 : 0) + (i + 0.5) * (barSpacing + barHeight), label, this.textColor, this.font, { "text-anchor": "start", "alignment-baseline": "central" });
             text.setAttribute("transform", `scale(${viewboxWidthScale},1) translate(${parseFloat(text.getAttribute("x")) / viewboxWidthScale - parseFloat(text.getAttribute("x"))}, 0)`);
             this.svg.appendChild(text);
         }
@@ -838,6 +871,7 @@ class Timeline {
      * @param {boolean} [params.legend.visible = true] - whether a legend should be shown underneath the timelines.
      * @param {number} [params.legend.distance = 15] - distance from the last timeline to the legend in px. Always set to 0 if params.legend.visible === false.
      * @param {number} [params.legend.textColor = "white"] - the color of the text in the legend.
+     * @param {number} [params.legend.textWidth = "variable"] - distance between the legend text and the legend.
      * @param {'variable' | number} [params.distance = 'variable'] - whether the distance between timelines should be variable (based on svg size) or a fixed number of px.
      * @param {boolean} [params.adjustSize = false] - whether the size of the container should be adjusted based on the needed space. Only works if params.distance != 'variable'.
      * @throws Will throw an error if the container element is not found.
@@ -878,11 +912,12 @@ class Timeline {
             legend: {
                 visible: true,
                 distance: 15,
-                textColor: "white"
+                textColor: "white",
+                textWidth: "variable"
             },
             lineHeight: 25,
             distance: 'variable',
-            adjustSize: false
+            adjustSize: false,
         });
 
         this.scale = params.scale;
@@ -893,6 +928,7 @@ class Timeline {
         this.legend = params.legend.visible;
         this.legendDistance = params.legend.distance;
         this.legendTextColor = params.legend.textColor;
+        this.legendTextWidth = params.legend.textWidth;
         this.lineHeight = params.lineHeight;
         this.distance = params.distance;
         this.adjustSize = this.distance !== 'variable' && params.adjustSize;
@@ -922,7 +958,7 @@ class Timeline {
         const lineCount = this.data.timelines.length;
         const textWidth1 = this.data.timelines.reduce((p, c) => Math.max(p, c.label.length > 0 ? (40 + c.label.length * 7.5) * viewboxWidthScale : 0), 0); // 7.5 per char 
         const textWidth2 = this.data.timelines.reduce((p, c) => Math.max(p, c.values.reduce((p, c) => Math.max(p, (10 + this.formatMinutes(c.length).length * 7.5) * viewboxWidthScale), 0)), 0); // 7.5 per char
-        const widthLeft = Math.max(textWidth1 + textWidth2, 20 * viewboxWidthScale);
+        const widthLeft = this.legendTextWidth === "variable" ? Math.max(textWidth1 + textWidth2, 20 * viewboxWidthScale) : this.legendTextWidth * viewboxWidthScale;
         const widthRight = 20 * viewboxWidthScale;
         const scaleHeight = 20;
         const lineWidth = 100 - widthLeft - widthRight;

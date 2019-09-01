@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,22 +14,27 @@
         }
     </style>
 </head>
+
 <body>
     <div id="container" style="width: 50vw; height: 50vh;"></div>
 
     <script>
-        const chart = new TimeCharts.Barchart("#container", {
-            data: [{"label":"Privat","datasets":[{"title":"Finanzen","value":0.91},{"title":"Helfen","value":0.64}]},{"label":"Projekte","datasets":[{"title":"TimeTracker","value":20.26}]}],  
+        /*const chart = new TimeCharts.Barchart("#container", {
+            data: [{ "label": "Privat", "datasets": [{ "title": "Finanzen", "value": 0.91 }, { "title": "Helfen", "value": 0.64 }] }, { "label": "Projekte", "datasets": [{ "title": "TimeTracker", "value": 20.26 }] }],
             orientation: "horizontal",
             padding: {
-                top: 50, 
+                top: 50,
                 left: 50,
                 right: 50,
-                bottom:50
+                bottom: 50
+            },
+            scale: {
+                visible: true,
+                interval: 20
             }
-        });
-        
-        /*const chart = new TimeCharts.Timeline("#container", {
+        });*/
+
+        const chart = new TimeCharts.Timeline("#container", {
             scale: {
                 from: 7 * 60,
                 to: 19 * 60,
@@ -75,15 +81,19 @@
                         }]
                     }
                 ],
-            },  
+            },
             padding: {
-                top: 50, 
+                top: 50,
                 left: 50,
                 right: 50,
                 bottom: 50
             },
-            legendDistance: 20,
-        });*/
+            legend: {
+                distance: 20,
+                textWidth: "variable"
+            }
+        });
     </script>
 </body>
+
 </html>
