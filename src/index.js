@@ -467,6 +467,7 @@ class Barchart {
      * @param {boolean} [params.hover.visible = true] - whether the titles should be shown on hover or not.
      * @param {Function} [params.hover.callback] - function that returns html that is displayed in the hover effect. Receives (title, value).
      * @param {'variable' | number} [params.distance = 'variable'] - whether the distance between timelines should be variable (based on svg size) or a fixed number of px.
+     * @param {number} [params.minDistance = 0] - the minimum number of pixels between bars.
      * @param {boolean} [params.adjustSize = false] - whether the size of the container should be adjusted based on the needed space. Only works if params.distance != 'variable'.
      * @param {Object} [params.scale] - options for the scale
      * @param {boolean} [params.scale.visible = true] - whether the scale should be visible or not
@@ -506,6 +507,7 @@ class Barchart {
             },
             barSize: 25,
             distance: 'variable',
+            minDistance: 0,
             adjustSize: false,
             max: 'relative',
             scale: {
@@ -529,6 +531,7 @@ class Barchart {
         this.hover = params.hover;
         this.barSize = params.barSize;
         this.distance = params.distance;
+        this.minDistance = params.minDistance;
         this.adjustSize = this.distance !== 'variable' && params.adjustSize;
         this.scale = params.scale;
         this.draggable = params.draggable;
@@ -580,7 +583,7 @@ class Barchart {
 
         const realWidth = this.container.clientWidth - this.padding.right - this.padding.left;
         const viewboxWidthScale = realWidth / 100;
-        const barSpacing = this.distance === 'variable' ? (100 * viewboxWidthScale - (this.scale.visible ? 30 : 0)) / barCount - barWidth : this.distance;
+        const barSpacing = Math.max(this.minDistance, this.distance === 'variable' ? (100 * viewboxWidthScale - (this.scale.visible ? 30 : 0)) / barCount - barWidth : this.distance);
 
         // Find max value
         let max = 0
@@ -727,7 +730,7 @@ class Barchart {
 
         const realHeight = this.container.clientHeight - this.padding.top - this.padding.bottom;
         const viewboxHeightScale = realHeight / 100;
-        const barSpacing = this.distance === 'variable' ? (100 * viewboxHeightScale - (this.scale.visible ? 30 : 0)) / barCount - barHeight : this.distance;
+        const barSpacing = Math.max(this.minDistance, this.distance === 'variable' ? (100 * viewboxHeightScale - (this.scale.visible ? 30 : 0)) / barCount - barHeight : this.distance);
 
         // Find max value
         let max = 0
