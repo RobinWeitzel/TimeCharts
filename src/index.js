@@ -698,7 +698,7 @@ class Barchart {
                 if(startPos) {
                     let newPos = currentTranslate + e.clientX - startPos;
                     newPos = Math.min(0, newPos);
-                    newPos = Math.max(newPos, -((this.scale.visible ? 30 : 0) + 0.5 * barSpacing + this.dataContainer.getBoundingClientRect().width - realWidth));
+                    newPos = Math.max(newPos, -Math.max(0, (this.scale.visible ? 30 : 0) + 0.5 * barSpacing + this.dataContainer.getBoundingClientRect().width - realWidth));
 
                     this.dataContainer.style.transform = `translateX(${newPos}px)`;
                 } else {
@@ -845,7 +845,7 @@ class Barchart {
                 if(startPos) {
                     let newPos = currentTranslate + e.clientY - startPos;
                     newPos = Math.min(0, newPos);
-                    newPos = Math.max(newPos, -((this.scale.visible ? 30 : 0) + 0.5 * barSpacing + this.dataContainer.getBoundingClientRect().height - realHeight));
+                    newPos = Math.max(newPos, -Math.max(0, (this.scale.visible ? 30 : 0) + 0.5 * barSpacing + this.dataContainer.getBoundingClientRect().height - realHeight));
 
                     this.dataContainer.style.transform = `translateY(${newPos}px)`;
                 } else {
