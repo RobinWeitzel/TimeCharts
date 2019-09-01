@@ -450,7 +450,7 @@ class Barchart {
      * @param {Object[]} [params.data[].datasets] - each dataset represents one "block" of a bar.
      * @param {number} params.data[].datasets[].value - the value of the block.
      * @param {string} [params.data[].datasets[].title] - the title of the block.
-     * @param {number|string} [max = 'relative'] - the max value of the chart.
+     * @param {number|string} [params.max = 'relative'] - the max value of the chart.
      * @param {Object} [params.padding] - padding in all directions of the chart.
      * @param {number|string} [params.padding.top] - top padding for the chart.
      * @param {number|string} [params.padding.right] - right padding for the chart.
@@ -602,9 +602,11 @@ class Barchart {
         this.svg.style.boxSizing = "initial";
 
         // Draw scale
+        const scaleStepSize = barHeight / Math.floor(max / this.scale.interval);
+
         if(this.scale.visible) {
-            for(let i = 1; i < Math.ceil(barHeight / this.scale.interval); i++) { // Skip the first bar
-                const line = Draw.rect(30, barHeight - i * this.scale.interval, realWidth, 1 * viewboxHeightScale, this.scale.color);
+            for(let i = 1; i < Math.floor(max / this.scale.interval); i++) { // Skip the first bar
+                const line = Draw.rect(30, barHeight - i * scaleStepSize, realWidth, 1 * viewboxHeightScale, this.scale.color);
                 this.svg.appendChild(line);
             }
         }
@@ -673,8 +675,8 @@ class Barchart {
         if(this.scale.visible) {
             const rect = Draw.rect(0, 0, 30, 100, "white");
             this.svg.appendChild(rect);
-            for(let i = 1; i < Math.ceil(barHeight / this.scale.interval); i++) { // Skip the first bar
-                const text = Draw.text(0, barHeight - i * this.scale.interval, i * this.scale.interval, this.textColor, this.font, { "text-anchor": "start", "alignment-baseline": "central", "style": "user-select: none;" });
+            for(let i = 1; i < Math.floor(max / this.scale.interval); i++) { // Skip the first bar
+                const text = Draw.text(0, barHeight - i * scaleStepSize, i * this.scale.interval, this.textColor, this.font, { "text-anchor": "start", "alignment-baseline": "central", "style": "user-select: none;" });
                 text.setAttribute("transform", `scale(1,${viewboxHeightScale}) translate(0, ${parseFloat(text.getAttribute("y")) / viewboxHeightScale - parseFloat(text.getAttribute("y"))})`);
                 this.svg.appendChild(text);
             }
@@ -743,9 +745,11 @@ class Barchart {
         this.svg.style.boxSizing = "initial";
 
         // Draw scale
+        const scaleStepSize = barHeight / Math.floor(max / this.scale.interval);
+
         if(this.scale.visible) {
-            for(let i = 1; i < Math.ceil(barWidth / this.scale.interval); i++) { // Skip the first bar
-                const line = Draw.rect(i * this.scale.interval, 30, 1 * viewboxWidthScale, realHeight, this.scale.color);
+            for(let i = 1; i < Math.floor(max / this.scale.interval); i++) { // Skip the first bar
+                const line = Draw.rect(i * scaleStepSize, 30, 1 * viewboxWidthScale, realHeight, this.scale.color);
                 this.svg.appendChild(line);
             }
         }
@@ -814,8 +818,8 @@ class Barchart {
          if(this.scale.visible) {
             const rect = Draw.rect(0, 0, 100, 30, "white");
             this.svg.appendChild(rect);
-            for(let i = 1; i < Math.ceil(barWidth / this.scale.interval); i++) { // Skip the first bar
-                const text = Draw.text(i * this.scale.interval, 20, i * this.scale.interval, this.textColor, this.font, { "text-anchor": "middle", "style": "user-select: none;" });
+            for(let i = 1; i < Math.floor(max / this.scale.interval); i++) { // Skip the first bar
+                const text = Draw.text(i * scaleStepSize, 20, i * this.scale.interval, this.textColor, this.font, { "text-anchor": "middle", "style": "user-select: none;" });
                 text.setAttribute("transform", `scale(${viewboxWidthScale},1) translate(${parseFloat(text.getAttribute("x")) / viewboxWidthScale - parseFloat(text.getAttribute("x"))}, 0)`);
                 this.svg.appendChild(text);
             }

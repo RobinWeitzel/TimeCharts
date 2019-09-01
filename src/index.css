@@ -8,6 +8,7 @@
     opacity: 0.8;
     font-size: 11pt;
     font-family: Robot;
+    user-select: none;
 }
 
 .time-chart-tooltip::after {
@@ -20,4 +21,9 @@
     border-style: solid;
     border-color: black transparent transparent transparent;
     opacity: 0.8;
+    user-select: none;
+}
+
+.time-chart-tooltip * {
+    user-select: none;
 }

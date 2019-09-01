@@ -63,7 +63,7 @@
 <header>
     
         <h2><span class="attribs"><span class="type-signature"></span></span>
-            <span class="ancestors"><a href="module-TimeCharts.html">TimeCharts</a>~</span>Barchart<span class="signature">(element, params<span class="signature-attributes">opt</span>, max<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span></h2>
+            <span class="ancestors"><a href="module-TimeCharts.html">TimeCharts</a>~</span>Barchart<span class="signature">(element, params<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span></h2>
         
             <div class="class-description">Creates a bar chart</div>
         
@@ -83,7 +83,7 @@
     <h4 class="name" id="Barchart">
         
         <span class="code-name">
-            new Barchart<span class="signature">(element, params<span class="signature-attributes">opt</span>, max<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span>
+            new Barchart<span class="signature">(element, params<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span>
         </span>
     </h4>
     
@@ -427,12 +427,8 @@
 </tr>
 
   
-
-
     
-
-        
-<tr class="deep-level-0">
+<tr class="deep-level-1">
   
       <td class="name"><code>max</code></td>
   
@@ -472,13 +468,11 @@
   <td class="description last">the max value of the chart.</td>
 </tr>
 
-
-    
-
-        
-<tr class="deep-level-0">
   
-      <td class="name"><code>params.padding</code></td>
+    
+<tr class="deep-level-1">
+  
+      <td class="name"><code>padding</code></td>
   
 
   <td class="type">
@@ -512,11 +506,10 @@
 </tr>
 
   
-  
     
 <tr class="deep-level-1">
   
-      <td class="name"><code>top</code></td>
+      <td class="name"><code>padding.top</code></td>
   
 
   <td class="type">
@@ -556,7 +549,7 @@
     
 <tr class="deep-level-1">
   
-      <td class="name"><code>right</code></td>
+      <td class="name"><code>padding.right</code></td>
   
 
   <td class="type">
@@ -596,7 +589,7 @@
     
 <tr class="deep-level-1">
   
-      <td class="name"><code>bottom</code></td>
+      <td class="name"><code>padding.bottom</code></td>
   
 
   <td class="type">
@@ -636,7 +629,7 @@
     
 <tr class="deep-level-1">
   
-      <td class="name"><code>left</code></td>
+      <td class="name"><code>padding.left</code></td>
   
 
   <td class="type">
@@ -673,14 +666,10 @@
 </tr>
 
   
-
-
     
-
-        
-<tr class="deep-level-0">
+<tr class="deep-level-1">
   
-      <td class="name"><code>params.colors</code></td>
+      <td class="name"><code>colors</code></td>
   
 
   <td class="type">
@@ -714,11 +703,10 @@
 </tr>
 
   
-  
     
 <tr class="deep-level-1">
   
-      <td class="name"><code>foreground</code></td>
+      <td class="name"><code>colors.foreground</code></td>
   
 
   <td class="type">
@@ -757,7 +745,7 @@
     
 <tr class="deep-level-1">
   
-      <td class="name"><code>fixToTitle</code></td>
+      <td class="name"><code>colors.fixToTitle</code></td>
   
 
   <td class="type">
@@ -796,7 +784,7 @@
     
 <tr class="deep-level-1">
   
-      <td class="name"><code>background</code></td>
+      <td class="name"><code>colors.background</code></td>
   
 
   <td class="type">
@@ -835,7 +823,7 @@
     
 <tr class="deep-level-1">
   
-      <td class="name"><code>text</code></td>
+      <td class="name"><code>colors.text</code></td>
   
 
   <td class="type">
@@ -871,14 +859,10 @@
 </tr>
 
   
-
-
     
-
-        
-<tr class="deep-level-0">
+<tr class="deep-level-1">
   
-      <td class="name"><code>params.orientation</code></td>
+      <td class="name"><code>orientation</code></td>
   
 
   <td class="type">
@@ -916,13 +900,11 @@
   <td class="description last">orientation for the chart.</td>
 </tr>
 
-
-    
-
-        
-<tr class="deep-level-0">
   
-      <td class="name"><code>params.font</code></td>
+    
+<tr class="deep-level-1">
+  
+      <td class="name"><code>font</code></td>
   
 
   <td class="type">
@@ -957,13 +939,11 @@
   <td class="description last">the font for all writing. Font must be imported separately.</td>
 </tr>
 
-
-    
-
-        
-<tr class="deep-level-0">
   
-      <td class="name"><code>params.hover</code></td>
+    
+<tr class="deep-level-1">
+  
+      <td class="name"><code>hover</code></td>
   
 
   <td class="type">
@@ -997,11 +977,10 @@
 </tr>
 
   
-  
     
 <tr class="deep-level-1">
   
-      <td class="name"><code>visible</code></td>
+      <td class="name"><code>hover.visible</code></td>
   
 
   <td class="type">
@@ -1040,7 +1019,7 @@
     
 <tr class="deep-level-1">
   
-      <td class="name"><code>callback</code></td>
+      <td class="name"><code>hover.callback</code></td>
   
 
   <td class="type">
@@ -1074,14 +1053,10 @@
 </tr>
 
   
-
-
     
-
-        
-<tr class="deep-level-0">
+<tr class="deep-level-1">
   
-      <td class="name"><code>params.distance</code></td>
+      <td class="name"><code>distance</code></td>
   
 
   <td class="type">
@@ -1119,13 +1094,11 @@
   <td class="description last">whether the distance between timelines should be variable (based on svg size) or a fixed number of px.</td>
 </tr>
 
-
-    
-
-        
-<tr class="deep-level-0">
   
-      <td class="name"><code>params.adjustSize</code></td>
+    
+<tr class="deep-level-1">
+  
+      <td class="name"><code>adjustSize</code></td>
   
 
   <td class="type">
@@ -1160,13 +1133,11 @@
   <td class="description last">whether the size of the container should be adjusted based on the needed space. Only works if params.distance != 'variable'.</td>
 </tr>
 
-
-    
-
-        
-<tr class="deep-level-0">
   
-      <td class="name"><code>params.scale</code></td>
+    
+<tr class="deep-level-1">
+  
+      <td class="name"><code>scale</code></td>
   
 
   <td class="type">
@@ -1200,11 +1171,10 @@
 </tr>
 
   
-  
     
 <tr class="deep-level-1">
   
-      <td class="name"><code>visible</code></td>
+      <td class="name"><code>scale.visible</code></td>
   
 
   <td class="type">
@@ -1243,7 +1213,7 @@
     
 <tr class="deep-level-1">
   
-      <td class="name"><code>interval</code></td>
+      <td class="name"><code>scale.interval</code></td>
   
 
   <td class="type">
@@ -1282,7 +1252,7 @@
     
 <tr class="deep-level-1">
   
-      <td class="name"><code>color</code></td>
+      <td class="name"><code>scale.color</code></td>
   
 
   <td class="type">
@@ -1318,14 +1288,10 @@
 </tr>
 
   
-
-
     
-
-        
-<tr class="deep-level-0">
+<tr class="deep-level-1">
   
-      <td class="name"><code>params.draggable</code></td>
+      <td class="name"><code>draggable</code></td>
   
 
   <td class="type">
@@ -1360,13 +1326,11 @@
   <td class="description last">whether the chart can be dragged</td>
 </tr>
 
-
-    
-
-        
-<tr class="deep-level-0">
   
-      <td class="name"><code>params.onScroll</code></td>
+    
+<tr class="deep-level-1">
+  
+      <td class="name"><code>onScroll</code></td>
   
 
   <td class="type">
@@ -1398,6 +1362,8 @@
 
   <td class="description last">called when the user scrolls on the chart</td>
 </tr>
+
+  
 
 
     
@@ -1772,7 +1738,7 @@
         <p class="tag-source">
             <a href="index.js.html" class="button">View Source</a>
             <span>
-                <a href="index.js.html">index.js</a>, <a href="index.js.html#line885">line 885</a>
+                <a href="index.js.html">index.js</a>, <a href="index.js.html#line889">line 889</a>
             </span>
         </p>
     
@@ -1821,7 +1787,7 @@
 
 <footer class="footer">
     <div class="content has-text-centered">
-        <p>Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.3</a> on Sun Sep 01 2019 15:51:55 GMT+0200 (GMT+02:00)</p>
+        <p>Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.3</a> on Sun Sep 01 2019 17:11:09 GMT+0200 (GMT+02:00)</p>
         <p class="sidebar-created-by">
             <a href="https://github.com/SoftwareBrothers/better-docs" target="_blank">BetterDocs theme</a> provided with <i class="fas fa-heart"></i> by 
             <a href="http://softwarebrothers.co" target="_blank">SoftwareBrothers</a>

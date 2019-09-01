@@ -20,8 +20,17 @@
 
     <script>
         const chart = new TimeCharts.Barchart("#container", {
-            data: [{ "label": "Privat", "datasets": [{ "title": "Finanzen", "value": 0.91 }, { "title": "Helfen", "value": 0.64 }] }, { "label": "Projekte", "datasets": [{ "title": "TimeTracker", "value": 20.26 }] }],
-            orientation: "horizontal",
+            data: [
+                    { 
+                        "label": "Projekte", 
+                        "datasets": [
+                            { 
+                                "title": "TimeTracker", 
+                                "value": 20
+                            }
+                        ] 
+                    }],
+            orientation: "vertical",
             padding: {
                 top: 50,
                 left: 50,
@@ -30,10 +39,10 @@
             },
             scale: {
                 visible: true,
-                interval: 20
+                interval: 10
             },
-            distance: 600,
-            draggable: true,
+            max: 40,
+            draggable: false,
             onScroll: e => console.log(e)
         });
 
