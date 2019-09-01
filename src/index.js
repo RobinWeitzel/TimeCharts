@@ -468,10 +468,12 @@ class Barchart {
      * @param {Function} [params.hover.callback] - function that returns html that is displayed in the hover effect. Receives (title, value).
      * @param {'variable' | number} [params.distance = 'variable'] - whether the distance between timelines should be variable (based on svg size) or a fixed number of px.
      * @param {boolean} [params.adjustSize = false] - whether the size of the container should be adjusted based on the needed space. Only works if params.distance != 'variable'.
-     * @param {Object} [scale] - options for the scale
-     * @param {boolean} [scale.visible = true] - whether the scale should be visible or not
-     * @param {number} [scale.interval = 10] - the interval at which to draw the scale
-     * @param {number} [scale.color = "#E3E6E9"] - the color of the scale lines
+     * @param {Object} [params.scale] - options for the scale
+     * @param {boolean} [params.scale.visible = true] - whether the scale should be visible or not
+     * @param {number} [params.scale.interval = 10] - the interval at which to draw the scale
+     * @param {number} [params.scale.color = "#E3E6E9"] - the color of the scale lines
+     * @param {boolean} [params.draggable = false] - whether the chart can be dragged
+     * @param {Function} [params.onScroll] - called when the user scrolls on the chart
      * @throws Will throw an error if the container element is not found.
      */
     constructor(element, params) {
@@ -510,7 +512,9 @@ class Barchart {
                 visible: true,
                 interval: 10,
                 color: "#E3E6E9"
-            }
+            },
+            draggable: false,
+            onScroll: e => {}
         });
 
         this.data = params.data;
@@ -527,6 +531,8 @@ class Barchart {
         this.distance = params.distance;
         this.adjustSize = this.distance !== 'variable' && params.adjustSize;
         this.scale = params.scale;
+        this.draggable = params.draggable;
+        this.onScroll = params.onScroll;
 
         if (this.orientation !== "horizontal") {
             this.drawVertical();
@@ -597,16 +603,16 @@ class Barchart {
 
         // Draw scale
         if(this.scale.visible) {
-            for(let i = 0; i < Math.floor(barHeight / this.scale.interval); i++) { // Skip the first bar
-                const text = Draw.text(0, barHeight - i * this.scale.interval, i * this.scale.interval, this.textColor, this.font, { "text-anchor": "start", "alignment-baseline": "central" });
-                text.setAttribute("transform", `scale(1,${viewboxHeightScale}) translate(0, ${parseFloat(text.getAttribute("y")) / viewboxHeightScale - parseFloat(text.getAttribute("y"))})`);
-                this.svg.appendChild(text);
+            for(let i = 1; i < Math.ceil(barHeight / this.scale.interval); i++) { // Skip the first bar
                 const line = Draw.rect(30, barHeight - i * this.scale.interval, realWidth, 1 * viewboxHeightScale, this.scale.color);
                 this.svg.appendChild(line);
             }
         }
 
         // Draw data
+        this.dataContainer = Draw.group();
+        this.svg.appendChild(this.dataContainer);
+
         for (let i = 0; i < barCount; i++) {
             const label = this.data[i].label || "";
 
@@ -617,7 +623,7 @@ class Barchart {
                 `M ${(this.scale.visible ? 30 : 0) + (i + 0.5) * barSpacing + i * barWidth},${0} m 0, ${barHeight - ry} a ${rx},${ry} 0 0 0 ${barWidth},0 v ${ry * 2 - barHeight} a ${rx},${ry} 0 0 0 ${-barWidth},0 z`,
                 this.backgroundColor
             );
-            this.svg.appendChild(background);
+            this.dataContainer.appendChild(background);
 
             let y = 0; // height of the bar. Contains the position at which to draw the next rectangle
 
@@ -651,21 +657,49 @@ class Barchart {
                     }
 
                     if (y < barHeight) { // only draw the part if it would not overshoot
-                        this.svg.appendChild(foreground);
+                        this.dataContainer.appendChild(foreground);
                     }
 
                     y = y + height;
                 }
             }
 
-            const text = Draw.text((this.scale.visible ? 30 : 0) + (i + 0.5) * (barSpacing + barWidth), barHeight + (20 * viewboxHeightScale), label, this.textColor, this.font);
+            const text = Draw.text((this.scale.visible ? 30 : 0) + (i + 0.5) * (barSpacing + barWidth), barHeight + (20 * viewboxHeightScale), label, this.textColor, this.font, {"style": "user-select: none;"});
             text.setAttribute("transform", `scale(1,${viewboxHeightScale}) translate(0, ${parseFloat(text.getAttribute("y")) / viewboxHeightScale - parseFloat(text.getAttribute("y"))})`);
-            this.svg.appendChild(text);
+            this.dataContainer.appendChild(text);
+        }
+
+        // Draw scale text
+        if(this.scale.visible) {
+            const rect = Draw.rect(0, 0, 30, 100, "white");
+            this.svg.appendChild(rect);
+            for(let i = 1; i < Math.ceil(barHeight / this.scale.interval); i++) { // Skip the first bar
+                const text = Draw.text(0, barHeight - i * this.scale.interval, i * this.scale.interval, this.textColor, this.font, { "text-anchor": "start", "alignment-baseline": "central", "style": "user-select: none;" });
+                text.setAttribute("transform", `scale(1,${viewboxHeightScale}) translate(0, ${parseFloat(text.getAttribute("y")) / viewboxHeightScale - parseFloat(text.getAttribute("y"))})`);
+                this.svg.appendChild(text);
+            }
         }
 
         clear(this.container);
         this.tooltip = undefined;
         this.container.appendChild(this.svg);
+
+        if(this.draggable) {
+            let startPos;
+            let currentTranslate = 0;
+            
+            this.svg.addEventListener('mousedown',e => startPos = e.clientX);
+            this.svg.addEventListener("mousemove", e => {
+                if(startPos) {
+                    this.dataContainer.style.transform = `translateX(${currentTranslate + e.clientX - startPos}px)`;
+                } else {
+                    currentTranslate = parseFloat(this.dataContainer.style.transform.replace("translateX(", "").replace("px)", "")) || 0;
+                }
+            });
+            document.addEventListener('mouseup', () => startPos = undefined);
+        }
+
+        this.svg.addEventListener("wheel", this.onScroll);
     }
 
     /**
@@ -710,17 +744,16 @@ class Barchart {
 
         // Draw scale
         if(this.scale.visible) {
-            for(let i = 0; i < Math.floor(barWidth / this.scale.interval); i++) { // Skip the first bar
-                const text = Draw.text(barWidth - i * this.scale.interval, 20, i * this.scale.interval, this.textColor, this.font, { "text-anchor": "middle" });
-                text.setAttribute("transform", `scale(${viewboxWidthScale},1) translate(${parseFloat(text.getAttribute("x")) / viewboxWidthScale - parseFloat(text.getAttribute("x"))}, 0)`);
-                this.svg.appendChild(text);
-
-                const line = Draw.rect(barWidth - i * this.scale.interval, 30, 1 * viewboxWidthScale, realHeight, this.scale.color);
+            for(let i = 1; i < Math.ceil(barWidth / this.scale.interval); i++) { // Skip the first bar
+                const line = Draw.rect(i * this.scale.interval, 30, 1 * viewboxWidthScale, realHeight, this.scale.color);
                 this.svg.appendChild(line);
             }
         }
 
         // Draw data
+        this.dataContainer = Draw.group();
+        this.svg.appendChild(this.dataContainer);
+
         for (let i = 0; i < barCount; i++) {
             const label = this.data[i].label || "";
 
@@ -731,7 +764,7 @@ class Barchart {
                 `M ${textWidth + rx}, ${(this.scale.visible ? 30 : 0) + (i + 0.5) * barSpacing + i * barHeight} a ${rx},${ry} 0 0 0 0,${barHeight} h ${barWidth - rx * 2} a ${rx},${ry} 0 0 0 0,${-barHeight} z`,
                 this.backgroundColor
             );
-            this.svg.appendChild(background);
+            this.dataContainer.appendChild(background);
 
             let x = 0; // width of the bar. Contains the position at which to draw the next rectangle
 
@@ -765,21 +798,49 @@ class Barchart {
                     }
     
                     if (x < barWidth) { // only draw the part if it would not overshoot
-                        this.svg.appendChild(foreground);
+                        this.dataContainer.appendChild(foreground);
                     }
     
                     x = x + width;
                 }     
             }
 
-            const text = Draw.text(0, (this.scale.visible ? 30 : 0) + (i + 0.5) * (barSpacing + barHeight), label, this.textColor, this.font, { "text-anchor": "start", "alignment-baseline": "central" });
+            const text = Draw.text(0, (this.scale.visible ? 30 : 0) + (i + 0.5) * (barSpacing + barHeight), label, this.textColor, this.font, { "text-anchor": "start", "alignment-baseline": "central", "style": "user-select: none;" });
             text.setAttribute("transform", `scale(${viewboxWidthScale},1) translate(${parseFloat(text.getAttribute("x")) / viewboxWidthScale - parseFloat(text.getAttribute("x"))}, 0)`);
-            this.svg.appendChild(text);
+            this.dataContainer.appendChild(text);
+        }
+
+         // Draw scale text
+         if(this.scale.visible) {
+            const rect = Draw.rect(0, 0, 100, 30, "white");
+            this.svg.appendChild(rect);
+            for(let i = 1; i < Math.ceil(barWidth / this.scale.interval); i++) { // Skip the first bar
+                const text = Draw.text(i * this.scale.interval, 20, i * this.scale.interval, this.textColor, this.font, { "text-anchor": "middle", "style": "user-select: none;" });
+                text.setAttribute("transform", `scale(${viewboxWidthScale},1) translate(${parseFloat(text.getAttribute("x")) / viewboxWidthScale - parseFloat(text.getAttribute("x"))}, 0)`);
+                this.svg.appendChild(text);
+            }
         }
 
         clear(this.container);
         this.tooltip = undefined;
         this.container.appendChild(this.svg);
+
+        if(this.draggable) {
+            let startPos;
+            let currentTranslate = 0;
+            
+            this.svg.addEventListener('mousedown',e => startPos = e.clientY);
+            this.svg.addEventListener("mousemove", e => {
+                if(startPos) {
+                    this.dataContainer.style.transform = `translateY(${currentTranslate + e.clientY - startPos}px)`;
+                } else {
+                    currentTranslate = parseFloat(this.dataContainer.style.transform.replace("translateY(", "").replace("px)", "")) || 0;
+                }
+            });
+            document.addEventListener('mouseup', () => startPos = undefined);
+        }
+
+        this.svg.addEventListener("wheel", this.onScroll);
     }
 
     /**
