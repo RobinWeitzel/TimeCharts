@@ -29,8 +29,17 @@
                                 "value": 20
                             }
                         ] 
+                    },
+                    { 
+                        "label": "Projekte2", 
+                        "datasets": [
+                            { 
+                                "title": "TimeTracker", 
+                                "value": 10
+                            }
+                        ] 
                     }],
-            orientation: "vertical",
+            orientation: "horizontal",
             padding: {
                 top: 50,
                 left: 50,
@@ -42,7 +51,8 @@
                 interval: 10
             },
             max: 40,
-            draggable: false,
+            distance: 200,
+            draggable: true,
             onScroll: e => console.log(e)
         });
 

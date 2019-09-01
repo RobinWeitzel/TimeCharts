@@ -693,7 +693,8 @@ class Barchart {
             this.svg.addEventListener('mousedown',e => startPos = e.clientX);
             this.svg.addEventListener("mousemove", e => {
                 if(startPos) {
-                    this.dataContainer.style.transform = `translateX(${currentTranslate + e.clientX - startPos}px)`;
+                    const width = -this.dataContainer.getBoundingClientRect().width;
+                    this.dataContainer.style.transform = `translateX(${Math.max(Math.min(currentTranslate + e.clientX - startPos, 0), width)}px)`;
                 } else {
                     currentTranslate = parseFloat(this.dataContainer.style.transform.replace("translateX(", "").replace("px)", "")) || 0;
                 }
@@ -745,7 +746,7 @@ class Barchart {
         this.svg.style.boxSizing = "initial";
 
         // Draw scale
-        const scaleStepSize = barHeight / Math.floor(max / this.scale.interval);
+        const scaleStepSize = barWidth / Math.floor(max / this.scale.interval);
 
         if(this.scale.visible) {
             for(let i = 1; i < Math.floor(max / this.scale.interval); i++) { // Skip the first bar
@@ -836,7 +837,8 @@ class Barchart {
             this.svg.addEventListener('mousedown',e => startPos = e.clientY);
             this.svg.addEventListener("mousemove", e => {
                 if(startPos) {
-                    this.dataContainer.style.transform = `translateY(${currentTranslate + e.clientY - startPos}px)`;
+                    const height = -this.dataContainer.getBoundingClientRect().height;
+                    this.dataContainer.style.transform = `translateY(${Math.max(Math.min(0, currentTranslate + e.clientY - startPos), height)}px)`;
                 } else {
                     currentTranslate = parseFloat(this.dataContainer.style.transform.replace("translateY(", "").replace("px)", "")) || 0;
                 }
