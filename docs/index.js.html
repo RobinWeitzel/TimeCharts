@@ -532,6 +532,12 @@ class Barchart {
      * @param {Function} [params.hover.callback] - function that returns html that is displayed in the hover effect. Receives (title, value).
      * @param {'variable' | number} [params.distance = 'variable'] - whether the distance between timelines should be variable (based on svg size) or a fixed number of px.
      * @param {boolean} [params.adjustSize = false] - whether the size of the container should be adjusted based on the needed space. Only works if params.distance != 'variable'.
+     * @param {Object} [params.scale] - options for the scale
+     * @param {boolean} [params.scale.visible = true] - whether the scale should be visible or not
+     * @param {number} [params.scale.interval = 10] - the interval at which to draw the scale
+     * @param {number} [params.scale.color = "#E3E6E9"] - the color of the scale lines
+     * @param {boolean} [params.draggable = false] - whether the chart can be dragged
+     * @param {Function} [params.onScroll] - called when the user scrolls on the chart
      * @throws Will throw an error if the container element is not found.
      */
     constructor(element, params) {
@@ -565,7 +571,14 @@ class Barchart {
             barSize: 25,
             distance: 'variable',
             adjustSize: false,
-            max: 'relative'
+            max: 'relative',
+            scale: {
+                visible: true,
+                interval: 10,
+                color: "#E3E6E9"
+            },
+            draggable: false,
+            onScroll: e => {}
         });
 
         this.data = params.data;
@@ -581,6 +594,9 @@ class Barchart {
         this.barSize = params.barSize;
         this.distance = params.distance;
         this.adjustSize = this.distance !== 'variable' &amp;&amp; params.adjustSize;
+        this.scale = params.scale;
+        this.draggable = params.draggable;
+        this.onScroll = params.onScroll;
 
         if (this.orientation !== "horizontal") {
             this.drawVertical();
@@ -628,7 +644,7 @@ class Barchart {
 
         const realWidth = this.container.clientWidth - this.padding.right - this.padding.left;
         const viewboxWidthScale = realWidth / 100;
-        const barSpacing = this.distance === 'variable' ? (100 * viewboxWidthScale) / barCount - barWidth : this.distance;
+        const barSpacing = this.distance === 'variable' ? (100 * viewboxWidthScale - (this.scale.visible ? 30 : 0)) / barCount - barWidth : this.distance;
 
         // Find max value
         let max = 0
@@ -649,7 +665,18 @@ class Barchart {
         this.svg.style.paddingLeft = this.padding.left;
         this.svg.style.boxSizing = "initial";
 
+        // Draw scale
+        if(this.scale.visible) {
+            for(let i = 1; i &lt; Math.ceil(barHeight / this.scale.interval); i++) { // Skip the first bar
+                const line = Draw.rect(30, barHeight - i * this.scale.interval, realWidth, 1 * viewboxHeightScale, this.scale.color);
+                this.svg.appendChild(line);
+            }
+        }
+
         // Draw data
+        this.dataContainer = Draw.group();
+        this.svg.appendChild(this.dataContainer);
+
         for (let i = 0; i &lt; barCount; i++) {
             const label = this.data[i].label || "";
 
@@ -657,10 +684,10 @@ class Barchart {
             const ry = barWidth / 2 * viewboxHeightScale;
 
             const background = Draw.path(
-                `M ${(i + 0.5) * barSpacing + i * barWidth},${0} m 0, ${barHeight - ry} a ${rx},${ry} 0 0 0 ${barWidth},0 v ${ry * 2 - barHeight} a ${rx},${ry} 0 0 0 ${-barWidth},0 z`,
+                `M ${(this.scale.visible ? 30 : 0) + (i + 0.5) * barSpacing + i * barWidth},${0} m 0, ${barHeight - ry} a ${rx},${ry} 0 0 0 ${barWidth},0 v ${ry * 2 - barHeight} a ${rx},${ry} 0 0 0 ${-barWidth},0 z`,
                 this.backgroundColor
             );
-            this.svg.appendChild(background);
+            this.dataContainer.appendChild(background);
 
             let y = 0; // height of the bar. Contains the position at which to draw the next rectangle
 
@@ -684,7 +711,7 @@ class Barchart {
                 const height = (barHeight * value / max);
                 if(height > 0 &amp;&amp; y &lt; barHeight) {
                     const foreground = Draw.path(
-                        createVerticalBar((i + 0.5) * barSpacing + i * barWidth, barHeight, rx, ry, height, y, barHeight),
+                        createVerticalBar((this.scale.visible ? 30 : 0) + (i + 0.5) * barSpacing + i * barWidth, barHeight, rx, ry, height, y, barHeight),
                         color
                     );
 
@@ -694,21 +721,49 @@ class Barchart {
                     }
 
                     if (y &lt; barHeight) { // only draw the part if it would not overshoot
-                        this.svg.appendChild(foreground);
+                        this.dataContainer.appendChild(foreground);
                     }
 
                     y = y + height;
                 }
             }
 
-            const text = Draw.text((i + 0.5) * (barSpacing + barWidth), barHeight + (20 * viewboxHeightScale), label, this.textColor, this.font);
+            const text = Draw.text((this.scale.visible ? 30 : 0) + (i + 0.5) * (barSpacing + barWidth), barHeight + (20 * viewboxHeightScale), label, this.textColor, this.font, {"style": "user-select: none;"});
             text.setAttribute("transform", `scale(1,${viewboxHeightScale}) translate(0, ${parseFloat(text.getAttribute("y")) / viewboxHeightScale - parseFloat(text.getAttribute("y"))})`);
-            this.svg.appendChild(text);
+            this.dataContainer.appendChild(text);
+        }
+
+        // Draw scale text
+        if(this.scale.visible) {
+            const rect = Draw.rect(0, 0, 30, 100, "white");
+            this.svg.appendChild(rect);
+            for(let i = 1; i &lt; Math.ceil(barHeight / this.scale.interval); i++) { // Skip the first bar
+                const text = Draw.text(0, barHeight - i * this.scale.interval, i * this.scale.interval, this.textColor, this.font, { "text-anchor": "start", "alignment-baseline": "central", "style": "user-select: none;" });
+                text.setAttribute("transform", `scale(1,${viewboxHeightScale}) translate(0, ${parseFloat(text.getAttribute("y")) / viewboxHeightScale - parseFloat(text.getAttribute("y"))})`);
+                this.svg.appendChild(text);
+            }
         }
 
         clear(this.container);
         this.tooltip = undefined;
         this.container.appendChild(this.svg);
+
+        if(this.draggable) {
+            let startPos;
+            let currentTranslate = 0;
+            
+            this.svg.addEventListener('mousedown',e => startPos = e.clientX);
+            this.svg.addEventListener("mousemove", e => {
+                if(startPos) {
+                    this.dataContainer.style.transform = `translateX(${currentTranslate + e.clientX - startPos}px)`;
+                } else {
+                    currentTranslate = parseFloat(this.dataContainer.style.transform.replace("translateX(", "").replace("px)", "")) || 0;
+                }
+            });
+            document.addEventListener('mouseup', () => startPos = undefined);
+        }
+
+        this.svg.addEventListener("wheel", this.onScroll);
     }
 
     /**
@@ -730,7 +785,7 @@ class Barchart {
 
         const realHeight = this.container.clientHeight - this.padding.top - this.padding.bottom;
         const viewboxHeightScale = realHeight / 100;
-        const barSpacing = this.distance === 'variable' ? (100 * viewboxHeightScale) / barCount - barHeight : this.distance;
+        const barSpacing = this.distance === 'variable' ? (100 * viewboxHeightScale - (this.scale.visible ? 30 : 0)) / barCount - barHeight : this.distance;
 
         // Find max value
         let max = 0
@@ -751,7 +806,18 @@ class Barchart {
         this.svg.style.paddingLeft = this.padding.left;
         this.svg.style.boxSizing = "initial";
 
+        // Draw scale
+        if(this.scale.visible) {
+            for(let i = 1; i &lt; Math.ceil(barWidth / this.scale.interval); i++) { // Skip the first bar
+                const line = Draw.rect(i * this.scale.interval, 30, 1 * viewboxWidthScale, realHeight, this.scale.color);
+                this.svg.appendChild(line);
+            }
+        }
+
         // Draw data
+        this.dataContainer = Draw.group();
+        this.svg.appendChild(this.dataContainer);
+
         for (let i = 0; i &lt; barCount; i++) {
             const label = this.data[i].label || "";
 
@@ -759,10 +825,10 @@ class Barchart {
             const ry = barHeight / 2;
 
             const background = Draw.path(
-                `M ${textWidth + rx}, ${(i + 0.5) * barSpacing + i * barHeight} a ${rx},${ry} 0 0 0 0,${barHeight} h ${barWidth - rx * 2} a ${rx},${ry} 0 0 0 0,${-barHeight} z`,
+                `M ${textWidth + rx}, ${(this.scale.visible ? 30 : 0) + (i + 0.5) * barSpacing + i * barHeight} a ${rx},${ry} 0 0 0 0,${barHeight} h ${barWidth - rx * 2} a ${rx},${ry} 0 0 0 0,${-barHeight} z`,
                 this.backgroundColor
             );
-            this.svg.appendChild(background);
+            this.dataContainer.appendChild(background);
 
             let x = 0; // width of the bar. Contains the position at which to draw the next rectangle
 
@@ -784,10 +850,9 @@ class Barchart {
                 }
 
                 const width = (barWidth * value / max);
-
                 if(width > 0 &amp;&amp; x &lt; barWidth) {
                     const foreground = Draw.path(
-                        createHorizontalBar(textWidth, (i + 0.5) * barSpacing + i * barHeight, rx, ry, width, x, barWidth),
+                        createHorizontalBar(textWidth, (this.scale.visible ? 30 : 0) + (i + 0.5) * barSpacing + i * barHeight, rx, ry, width, x, barWidth),
                         color
                     );
 
@@ -797,21 +862,49 @@ class Barchart {
                     }
     
                     if (x &lt; barWidth) { // only draw the part if it would not overshoot
-                        this.svg.appendChild(foreground);
+                        this.dataContainer.appendChild(foreground);
                     }
     
-                    x = x + barWidth * value;
+                    x = x + width;
                 }     
             }
 
-            const text = Draw.text(0, (i + 0.5) * (barSpacing + barHeight), label, this.textColor, this.font, { "text-anchor": "start", "alignment-baseline": "central" });
+            const text = Draw.text(0, (this.scale.visible ? 30 : 0) + (i + 0.5) * (barSpacing + barHeight), label, this.textColor, this.font, { "text-anchor": "start", "alignment-baseline": "central", "style": "user-select: none;" });
             text.setAttribute("transform", `scale(${viewboxWidthScale},1) translate(${parseFloat(text.getAttribute("x")) / viewboxWidthScale - parseFloat(text.getAttribute("x"))}, 0)`);
-            this.svg.appendChild(text);
+            this.dataContainer.appendChild(text);
+        }
+
+         // Draw scale text
+         if(this.scale.visible) {
+            const rect = Draw.rect(0, 0, 100, 30, "white");
+            this.svg.appendChild(rect);
+            for(let i = 1; i &lt; Math.ceil(barWidth / this.scale.interval); i++) { // Skip the first bar
+                const text = Draw.text(i * this.scale.interval, 20, i * this.scale.interval, this.textColor, this.font, { "text-anchor": "middle", "style": "user-select: none;" });
+                text.setAttribute("transform", `scale(${viewboxWidthScale},1) translate(${parseFloat(text.getAttribute("x")) / viewboxWidthScale - parseFloat(text.getAttribute("x"))}, 0)`);
+                this.svg.appendChild(text);
+            }
         }
 
         clear(this.container);
         this.tooltip = undefined;
         this.container.appendChild(this.svg);
+
+        if(this.draggable) {
+            let startPos;
+            let currentTranslate = 0;
+            
+            this.svg.addEventListener('mousedown',e => startPos = e.clientY);
+            this.svg.addEventListener("mousemove", e => {
+                if(startPos) {
+                    this.dataContainer.style.transform = `translateY(${currentTranslate + e.clientY - startPos}px)`;
+                } else {
+                    currentTranslate = parseFloat(this.dataContainer.style.transform.replace("translateY(", "").replace("px)", "")) || 0;
+                }
+            });
+            document.addEventListener('mouseup', () => startPos = undefined);
+        }
+
+        this.svg.addEventListener("wheel", this.onScroll);
     }
 
     /**
@@ -903,6 +996,7 @@ class Timeline {
      * @param {boolean} [params.legend.visible = true] - whether a legend should be shown underneath the timelines.
      * @param {number} [params.legend.distance = 15] - distance from the last timeline to the legend in px. Always set to 0 if params.legend.visible === false.
      * @param {number} [params.legend.textColor = "white"] - the color of the text in the legend.
+     * @param {number} [params.legend.textWidth = "variable"] - distance between the legend text and the legend.
      * @param {'variable' | number} [params.distance = 'variable'] - whether the distance between timelines should be variable (based on svg size) or a fixed number of px.
      * @param {boolean} [params.adjustSize = false] - whether the size of the container should be adjusted based on the needed space. Only works if params.distance != 'variable'.
      * @throws Will throw an error if the container element is not found.
@@ -943,11 +1037,12 @@ class Timeline {
             legend: {
                 visible: true,
                 distance: 15,
-                textColor: "white"
+                textColor: "white",
+                textWidth: "variable"
             },
             lineHeight: 25,
             distance: 'variable',
-            adjustSize: false
+            adjustSize: false,
         });
 
         this.scale = params.scale;
@@ -958,6 +1053,7 @@ class Timeline {
         this.legend = params.legend.visible;
         this.legendDistance = params.legend.distance;
         this.legendTextColor = params.legend.textColor;
+        this.legendTextWidth = params.legend.textWidth;
         this.lineHeight = params.lineHeight;
         this.distance = params.distance;
         this.adjustSize = this.distance !== 'variable' &amp;&amp; params.adjustSize;
@@ -987,7 +1083,7 @@ class Timeline {
         const lineCount = this.data.timelines.length;
         const textWidth1 = this.data.timelines.reduce((p, c) => Math.max(p, c.label.length > 0 ? (40 + c.label.length * 7.5) * viewboxWidthScale : 0), 0); // 7.5 per char 
         const textWidth2 = this.data.timelines.reduce((p, c) => Math.max(p, c.values.reduce((p, c) => Math.max(p, (10 + this.formatMinutes(c.length).length * 7.5) * viewboxWidthScale), 0)), 0); // 7.5 per char
-        const widthLeft = Math.max(textWidth1 + textWidth2, 20 * viewboxWidthScale);
+        const widthLeft = this.legendTextWidth === "variable" ? Math.max(textWidth1 + textWidth2, 20 * viewboxWidthScale) : this.legendTextWidth * viewboxWidthScale;
         const widthRight = 20 * viewboxWidthScale;
         const scaleHeight = 20;
         const lineWidth = 100 - widthLeft - widthRight;
@@ -1274,7 +1370,7 @@ export {
 
 <footer class="footer">
     <div class="content has-text-centered">
-        <p>Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.3</a> on Wed Aug 21 2019 17:50:01 GMT+0200 (GMT+02:00)</p>
+        <p>Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.3</a> on Sun Sep 01 2019 15:51:55 GMT+0200 (GMT+02:00)</p>
         <p class="sidebar-created-by">
             <a href="https://github.com/SoftwareBrothers/better-docs" target="_blank">BetterDocs theme</a> provided with <i class="fas fa-heart"></i> by 
             <a href="http://softwarebrothers.co" target="_blank">SoftwareBrothers</a>
