@@ -450,6 +450,7 @@ class Barchart {
      * @param {Object[]} [params.data[].datasets] - each dataset represents one "block" of a bar.
      * @param {number} params.data[].datasets[].value - the value of the block.
      * @param {string} [params.data[].datasets[].title] - the title of the block.
+     * @param {string} [params.data[].datasets[].color] - the color of the block.
      * @param {number|string} [params.max = 'relative'] - the max value of the chart.
      * @param {Object} [params.padding] - padding in all directions of the chart.
      * @param {number|string} [params.padding.top] - top padding for the chart.
@@ -457,7 +458,6 @@ class Barchart {
      * @param {number|string} [params.padding.bottom] - bottom padding for the chart.
      * @param {number|string} [params.padding.left] - left padding for the chart.
      * @param {Object} [params.colors] - custom colors
-     * @param {string[]} [params.colors.foreground = ['#7cd6fd', '#5e64ff', '#743ee2', '#ff5858', '#ffa00a', '#feef72', '#28a745', '#98d85b', '#b554ff', '#ffa3ef', '#36114C', '#bdd3e6', '#f0f4f7', '#b8c2cc']] - the colors for each bar.
      * @param {boolean} [params.colors.fixToTitle = true] - Whether bar-portions with the same title should also have the same color.
      * @param {string} [params.colors.background = "#E3E6E9"] - the color of the background of the bars (not the color of background of the whole chart).
      * @param {string} [params.colors.text = "black"] - the color of the text.
@@ -494,7 +494,6 @@ class Barchart {
                 left: 0
             },
             colors: {
-                foreground: ['#7cd6fd', '#5e64ff', '#743ee2', '#ff5858', '#ffa00a', '#feef72', '#28a745', '#98d85b', '#b554ff', '#ffa3ef', '#36114C', '#bdd3e6', '#f0f4f7', '#b8c2cc'],
                 fixToTitle: true,
                 background: "#E3E6E9",
                 text: "black"
@@ -522,8 +521,8 @@ class Barchart {
         this.data = params.data;
         this.padding = params.padding;
         this.max = params.max;
-        this.foregroundColors = params.colors.foreground;
         this.fixColorToTitle = params.colors.fixToTitle;
+        this.foregroundColors = ['#7cd6fd', '#5e64ff', '#743ee2', '#ff5858', '#ffa00a', '#feef72', '#28a745', '#98d85b', '#b554ff', '#ffa3ef', '#36114C', '#bdd3e6', '#f0f4f7', '#b8c2cc'];
         this.backgroundColor = params.colors.background;
         this.textColor = params.colors.text;
         this.orientation = params.orientation;
@@ -635,18 +634,19 @@ class Barchart {
             for (let j = 0; j < this.data[i].datasets.length; j++) {
                 const value = this.data[i].datasets[j].value || 0;
                 const title = this.data[i].datasets[j].title || "";
+                let color = this.data[i].datasets[j].color || "";
 
-                let color = "";
-
-                if(this.fixColorToTitle){
-                    if (!(title in valueMap)) { // sub-category has not be encountered before
-                        color = this.foregroundColors[Object.keys(valueMap).length % this.foregroundColors.length];
-                        valueMap[title] = color;
+                if(color === "") {
+                    if(this.fixColorToTitle){
+                        if (!(title in valueMap)) { // sub-category has not be encountered before
+                            color = this.foregroundColors[Object.keys(valueMap).length % this.foregroundColors.length];
+                            valueMap[title] = color;
+                        } else {
+                            color = valueMap[title];
+                        }
                     } else {
-                        color = valueMap[title];
+                        color = this.foregroundColors[j % this.foregroundColors.length];
                     }
-                } else {
-                    color = this.foregroundColors[j % this.foregroundColors.length];
                 }
 
                 const height = (barHeight * value / max);
@@ -782,18 +782,19 @@ class Barchart {
             for (let j = 0; j < this.data[i].datasets.length; j++) {
                 const value = this.data[i].datasets[j].value || 0;
                 const title = this.data[i].datasets[j].title || "";
+                let color = this.data[i].datasets[j].color || "";
 
-                let color = "";
-
-                if(this.fixColorToTitle){
-                    if (!(title in valueMap)) { // sub-category has not be encountered before
-                        color = this.foregroundColors[Object.keys(valueMap).length % this.foregroundColors.length];
-                        valueMap[title] = color;
+                if(color === "") {
+                    if(this.fixColorToTitle){
+                        if (!(title in valueMap)) { // sub-category has not be encountered before
+                            color = this.foregroundColors[Object.keys(valueMap).length % this.foregroundColors.length];
+                            valueMap[title] = color;
+                        } else {
+                            color = valueMap[title];
+                        }
                     } else {
-                        color = valueMap[title];
+                        color = this.foregroundColors[j % this.foregroundColors.length];
                     }
-                } else {
-                    color = this.foregroundColors[j % this.foregroundColors.length];
                 }
 
                 const width = (barWidth * value / max);
