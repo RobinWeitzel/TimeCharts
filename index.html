@@ -19,7 +19,7 @@
     <div id="container" style="width: 50vw; height: 50vh;"></div>
 
     <script>
-        const chart = new TimeCharts.Barchart("#container", {
+        /*const chart = new TimeCharts.Barchart("#container", {
             data: [
                     { 
                         "label": "Projekte", 
@@ -162,9 +162,9 @@
             minDistance: 50,
             draggable: true,
             onScroll: e => console.log(e)
-        });
+        });*/
 
-        /*const chart = new TimeCharts.Timeline("#container", {
+        const chart = new TimeCharts.Timeline("#container", {
             scale: {
                 from: 7 * 60,
                 to: 19 * 60,
@@ -220,9 +220,10 @@
             },
             legend: {
                 distance: 20,
-                textWidth: "variable"
+                textWidth: "variable",
+                visible: false
             }
-        });*/
+        });
     </script>
 </body>
 

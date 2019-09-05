@@ -1040,11 +1040,41 @@ class Timeline {
         const scaleHeight = 20;
         const lineWidth = 100 - widthLeft - widthRight;
         const lineHeight = this.lineHeight;
-        const legendHeight = this.legend ? lineHeight : 0;
+        let legendLines = this.legend ? 1 : 0;
+        if(this.legend) {
+            const legendTitles = [].concat.apply([], this.data.timelines.map(t => t.values.map(v => {
+                return {
+                    title: v.title,
+                    length: v.length
+                }
+            })));
+
+            const groupedTitles = {};
+
+            for(const l of legendTitles) {
+                if(!groupedTitles[l.title])
+                groupedTitles[l.title] = l.length;
+                else
+                groupedTitles[l.title] += l.length;
+            }
+            
+            let x = 0;
+            for(let key of Object.keys(groupedTitles)) {
+                const width = ((`${key} - ${this.formatMinutes(groupedTitles[key])}`).length * 7.5 * viewboxWidthScale) + 2 * (lineHeight / 2 * viewboxWidthScale);
+                if(x + width > lineWidth) {
+                    legendLines++;
+                    x = 0;
+                }
+                x = x + width + 10 * viewboxWidthScale;
+            }
+        }
+        
+        const legendHeight = this.legend ? lineHeight : 10;
+        const legendTotalHeight = this.legend ? (legendHeight + 10) * legendLines - 10 : 0;
         const legendSpacing = this.legend ? this.legendDistance : 0;
 
         if (this.adjustSize) {
-            const height = scaleHeight + legendHeight + legendSpacing + lineCount * (lineHeight + this.distance) + this.padding.top + this.padding.bottom;
+            const height = scaleHeight + legendTotalHeight + legendSpacing + lineCount * (lineHeight + this.distance) + this.padding.top + this.padding.bottom;
             this.container.style.height = `${height}px`;
         }
 
@@ -1077,6 +1107,7 @@ class Timeline {
         }
 
         let x = 0;
+        let y = 0;
 
         // Draw data
         for (let i = 0; i < lineCount; i++) {
@@ -1188,22 +1219,27 @@ class Timeline {
                 for (let key of Object.keys(valueMap)) {
                     const content = `${key} - ${this.formatMinutes(valueMap[key].value)}`;
                     const width = (content.length * 7.5 * viewboxWidthScale) + 2 * rx;
+                    if(x + width > lineWidth) {
+                        x = 0;
+                        y += legendHeight + 10;
+                    }
+
                     const legend = Draw.path(
-                        `M ${widthLeft + x + rx},${scaleStart + legendSpacing + scaleHeight + (lineCount - 1) * lineSpacing + lineCount * lineHeight} a ${rx},${ry} 0 0 0 0,${legendHeight} h ${width - rx * 2} a ${rx},${ry} 0 0 0 0,${-legendHeight} z`,
+                        `M ${widthLeft + x + rx},${scaleStart + legendSpacing + scaleHeight + (lineCount - 1) * lineSpacing + lineCount * lineHeight + y} a ${rx},${ry} 0 0 0 0,${legendHeight} h ${width - rx * 2} a ${rx},${ry} 0 0 0 0,${-legendHeight} z`,
                         valueMap[key].color
                     );
                     this.svg.appendChild(legend);
 
-                    const text = Draw.text(widthLeft + x + 0.5 * width, scaleStart + legendSpacing + legendHeight * 0.5 + scaleHeight + (lineCount - 1) * lineSpacing + lineCount * lineHeight, content, this.legendTextColor, this.font, { "text-anchor": "middle", "alignment-baseline": "central" });
+                    const text = Draw.text(widthLeft + x + 0.5 * width, scaleStart + legendSpacing + legendHeight * 0.5 + scaleHeight + (lineCount - 1) * lineSpacing + lineCount * lineHeight + y, content, this.legendTextColor, this.font, { "text-anchor": "middle", "alignment-baseline": "central" });
                     text.setAttribute("transform", `scale(${viewboxWidthScale},1) translate(${parseFloat(text.getAttribute("x")) / viewboxWidthScale - parseFloat(text.getAttribute("x"))}, 0)`);
                     this.svg.appendChild(text);
 
                     x = x + width + 10 * viewboxWidthScale; // previous x, width of the rectangle and padding
                 }
             }
-
+            
         }
-
+        
         clear(this.container);
         this.tooltip = undefined;
         this.container.appendChild(this.svg);
