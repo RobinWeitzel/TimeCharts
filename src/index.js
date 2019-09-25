@@ -535,17 +535,22 @@ class Barchart {
         this.scale = params.scale;
         this.draggable = params.draggable;
         this.onScroll = params.onScroll;
+        this.drawing = false;
 
         if (this.orientation !== "horizontal") {
             this.drawVertical();
 
             if (typeof ResizeObserver === "function") {
                 const ro = new ResizeObserver(entries => {
+                    if(this.drawing)
+                        return;
                     this.drawVertical();
                 });
                 ro.observe(this.container);
             } else {
                 window.addEventListener('resize', () => {
+                    if(this.drawing)
+                        return;
                     this.drawVertical();
                 });
             }
@@ -553,11 +558,15 @@ class Barchart {
             this.drawHorizontal();
             if (typeof ResizeObserver === "function") {
                 const ro = new ResizeObserver(entries => {
+                    if(this.drawing)
+                        return;
                     this.drawHorizontal();
                 });
                 ro.observe(this.container);
             } else {
                 window.addEventListener('resize', () => {
+                    if(this.drawing)
+                        return;
                     this.drawHorizontal();
                 });
             }
@@ -569,6 +578,7 @@ class Barchart {
      * @private
      */
     drawVertical() {
+        this.drawing = true;
         const realHeight = this.container.clientHeight - this.padding.top - this.padding.bottom;
         const viewboxHeightScale = 100 / realHeight;
         const barCount = this.data.length;
@@ -714,6 +724,7 @@ class Barchart {
         }
 
         this.svg.addEventListener("wheel", this.onScroll);
+        this.drawing = false;
     }
 
     /**
@@ -721,6 +732,7 @@ class Barchart {
      * @private
      */
     drawHorizontal() {
+        this.drawing = true;
         const realWidth = this.container.clientWidth - this.padding.right - this.padding.left;
         const viewboxWidthScale = 100 / realWidth;
         const barCount = this.data.length;
@@ -867,6 +879,7 @@ class Barchart {
         }
 
         this.svg.addEventListener("wheel", this.onScroll);
+        this.drawing = false;
     }
 
     /**
@@ -1021,15 +1034,20 @@ class Timeline {
         this.adjustSize = this.distance !== 'variable' && params.adjustSize;
         this.backgroundColor = params.colors.background;
         this.textColor = params.colors.text;
+        this.drawing = false;
 
         this.draw();
         if (typeof ResizeObserver === "function") {
             const ro = new ResizeObserver(entries => {
+                if(this.drawing)
+                    return;
                 this.draw();
             });
             ro.observe(this.container);
         } else {
             window.addEventListener('resize', () => {
+                if(this.drawing)
+                    return;
                 this.draw();
             });
         }
@@ -1040,6 +1058,7 @@ class Timeline {
      * @private
      */
     draw() {
+        this.drawing = true;
         const realWidth = this.container.clientWidth - this.padding.right - this.padding.left;
         const viewboxWidthScale = 100 / realWidth;
         const lineCount = this.data.timelines.length;
