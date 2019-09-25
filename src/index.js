@@ -1285,7 +1285,7 @@ class Timeline {
         if (m === 0) {
             return `${h} ${ending}`;
         } else {
-            return `${h}:${m < 10 ? m + "0" : m} ${ending}`;
+            return `${h}:${m < 10 ? "0" + m : m} ${ending}`;
         }
     }
 
