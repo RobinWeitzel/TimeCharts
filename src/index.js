@@ -542,7 +542,7 @@ class Barchart {
 
             if (typeof ResizeObserver === "function") {
                 const ro = new ResizeObserver(entries => {
-                    if(this.drawing)
+                    if(this.drawing || entries[0].contentRect.width === 0 || entries[0].contentRect.height === 0)
                         return;
                     this.drawVertical();
                 });
@@ -558,7 +558,7 @@ class Barchart {
             this.drawHorizontal();
             if (typeof ResizeObserver === "function") {
                 const ro = new ResizeObserver(entries => {
-                    if(this.drawing)
+                    if(this.drawing || entries[0].contentRect.width === 0 || entries[0].contentRect.height === 0)
                         return;
                     this.drawHorizontal();
                 });
@@ -1039,7 +1039,7 @@ class Timeline {
         this.draw();
         if (typeof ResizeObserver === "function") {
             const ro = new ResizeObserver(entries => {
-                if(this.drawing)
+                if(this.drawing || entries[0].contentRect.width === 0 || entries[0].contentRect.height === 0)
                     return;
                 this.draw();
             });
@@ -1277,6 +1277,7 @@ class Timeline {
         clear(this.container);
         this.tooltip = undefined;
         this.container.appendChild(this.svg);
+        this.drawing = false;
     }
 
     /**
