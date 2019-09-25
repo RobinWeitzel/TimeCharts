@@ -594,6 +594,9 @@ class Barchart {
 
         const valueMap = {};
 
+        if(viewboxWidthScale <= 0)
+            return;
+
         this.svg = Draw.svg(`calc(100% - ${this.padding.right + this.padding.left}px)`, `calc(100% - ${this.padding.top + this.padding.bottom}px)`, 100 * viewboxWidthScale, 100);
 
         // Padding
@@ -741,6 +744,9 @@ class Barchart {
         }
 
         const valueMap = {};
+
+        if(viewboxHeightScale <= 0)
+            return;
   
         this.svg = Draw.svg(`calc(100% - ${this.padding.right + this.padding.left}px)`, `calc(100% - ${this.padding.top + this.padding.bottom}px)`, 100, 100 * viewboxHeightScale);
 
@@ -1082,6 +1088,9 @@ class Timeline {
         const viewboxHeightScale = realHeight / 100;
         const lineSpacing = this.distance === 'variable' ? (100 * viewboxHeightScale - scaleHeight - legendHeight - legendSpacing) / lineCount - lineHeight : this.distance;
         const scaleStart = Math.max(0.5 * lineSpacing - scaleHeight, 0);
+
+        if(viewboxHeightScale <= 0)
+            return;
 
         this.svg = Draw.svg(`calc(100% - ${this.padding.right + this.padding.left}px)`, `calc(100% - ${this.padding.top + this.padding.bottom}px)`, 100, 100 * viewboxHeightScale);
 
