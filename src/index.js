@@ -891,7 +891,7 @@ class Barchart {
      * @param {number|string} title - the title of the element
      */
     showTooltip(show, g, value, title) {
-        this.drawing = false;
+        this.drawing = true;
         if (this.tooltip === undefined) {
             this.tooltip = document.createElement('div');
             this.tooltip.style.display = "block";
@@ -912,7 +912,7 @@ class Barchart {
         this.tooltip.style.top = g.getBoundingClientRect().y - 43 + "px";
         this.tooltip.style.left = `calc(${g.getBoundingClientRect().x + g.getBoundingClientRect().width / 2 - this.tooltip.getBoundingClientRect().width / 2}px)`;
         this.tooltip.style.visibility = "visible";
-        this.drawing = true;
+        this.drawing = false;
     }
 
     /**
@@ -1347,7 +1347,7 @@ class Timeline {
      * @param {number|string} title - the title of the element
      */
     showTooltip(show, g, start, end, title) {
-        this.drawing = false;
+        this.drawing = true;
         if (this.tooltip === undefined) {
             this.tooltip = document.createElement('div');
             this.tooltip.style.display = "block";
@@ -1381,7 +1381,190 @@ class Timeline {
      * @param {number} params.data.timelines[].values[].length - the point at which the time slot ends in minutes.
      * @param {string} [params.data.timelines[].values[].title] - the title of the time slot.
      * @param {string[]} [params.data.timelines[].colors = ['#7cd6fd', '#5e64ff', '#743ee2', '#ff5858', '#ffa00a', '#feef72', '#28a745', '#98d85b', '#b554ff', '#ffa3ef', '#36114C', '#bdd3e6', '#f0f4f7', '#b8c2cc']] - the colors for the timeline.
+     */
+    setData(data) {
+        this.data = data;
+        this.draw();
+    }
+}
+
+class Piechart {
+    /**
+     * Constructs a Piechart
+     * @constructor
+     * @param {string} element - css query selector of the container dom element into which the chart is placed.
+     * @param {Object} [params] - options.
+     * @param {Object[]} [params.data] - the data to be displayed.
+     * @param {number} [params.data[].value] - value of the part.
+     * @param {number} [params.data[].label] - label of the part.
+     * @param {number} [params.data[].color] - color of the part.
      * @param {Object} [params.padding] - padding in all directions of the chart.
+     * @param {number|string} [params.padding.top] - top padding for the chart.
+     * @param {number|string} [params.padding.right] - right padding for the chart.
+     * @param {number|string} [params.padding.bottom] - bottom padding for the chart.
+     * @param {number|string} [params.padding.left] - left padding for the chart.
+     * @param {Array} [params.colors] - custom colors
+     * @param {string} [params.font = 'Roboto'] - the font for all writing. Font must be imported separately.
+     * @param {Object} [params.hover] - options for the hover effect.
+     * @param {boolean} [params.hover.visible = true] - whether the titles should be shown on hover or not.
+     * @param {Function} [params.hover.callback] - function that returns html that is displayed in the hover effect. Receives (title, start, end).
+     * @throws Will throw an error if the container element is not found.
+     */
+    constructor(element, params) {
+        this.container = document.querySelector(element);
+        if (this.container == null) {
+            console.error("Container for chart does not exist");
+            return;
+        }
+
+        // Extract parameters and sets defaults if parameters not available
+        mergeObjects(params, {
+            data: [
+
+            ],
+            padding: {
+                top: 0,
+                right: 0,
+                bottom: 0,
+                left: 0
+            },
+            colors: ['#7cd6fd', '#5e64ff', '#743ee2', '#ff5858', '#ffa00a', '#feef72', '#28a745', '#98d85b', '#b554ff', '#ffa3ef', '#36114C', '#bdd3e6', '#f0f4f7', '#b8c2cc'],
+            font: "Roboto",
+            hover: {
+                visible: true,
+                callback: (title, value) => `<span style="color: gray">${value}</span>${title !== "" ? ": " + title : ""}`
+            },
+            adjustSize: false,
+            donutFactor: 0
+        });
+
+        this.scale = params.scale;
+        this.data = params.data;
+        this.padding = params.padding;
+        this.font = params.font;
+        this.hover = params.hover;
+        this.colors = params.colors;
+        this.drawing = false;
+        this.donutFactor = params.donutFactor;
+
+        this.draw();
+        if (typeof ResizeObserver === "function") {
+            const ro = new ResizeObserver(entries => {
+                if(this.drawing || entries[0].contentRect.width === 0 || entries[0].contentRect.height === 0)
+                    return;
+                this.draw();
+            });
+            ro.observe(this.container);
+        } else {
+            window.addEventListener('resize', () => {
+                if(this.drawing)
+                    return;
+                this.draw();
+            });
+        }
+    }
+
+    /**
+     * Draws the piechart
+     * @private
+     */
+    draw() {
+        this.drawing = true;
+        this.svg = Draw.svg(`calc(100% - ${this.padding.right + this.padding.left}px)`, `calc(100% - ${this.padding.top + this.padding.bottom}px)`, 100, 100, {
+            preserveAspectRatio: "xMidYMin"
+        });
+
+        // Padding
+        this.svg.style.paddingTop = this.padding.top;
+        this.svg.style.paddingRight = this.padding.right;
+        this.svg.style.paddingBottom = this.padding.bottom;
+        this.svg.style.paddingLeft = this.padding.left;
+        this.svg.style.boxSizing = "initial";
+
+        // Draw data
+        const drawCircle = (cx, cy, rx, ry, part, prev, size) => {
+            const startX = cx + rx * Math.sin(prev * 2 * Math.PI);
+            const startY = cy + ry * Math.cos((0.5 + prev) * 2 * Math.PI);
+            const dx = rx * part;
+            const dy = ry * part;
+
+            size = Math.min(size, 0.999);
+
+            const path = `M ${startX} ${startY} A ${rx} ${ry} 0 ${size >= 0.5 ? 1 : 0} 1 ${cx + rx * Math.sin((size + prev) * 2 * Math.PI)}, ${cy + ry * Math.cos((0.5 + size + prev) * 2 * Math.PI)} L ${cx + dx * Math.sin((size + prev) * 2 * Math.PI)}, ${cy + dy * Math.cos((0.5 + size + prev) * 2 * Math.PI)} A ${dx} ${dy} 0 ${size >= 0.5 ? 1 : 0} 0 ${cx + (startX - cx) / rx * dx}, ${cy + (startY - cy) / ry * dy} z`;
+
+            return path;
+        }
+
+        let deg = 0;
+        const sum = this.data.reduce((p, c) => p + c.value, 0);
+        // Draw foreground
+        for (let i = 0; i < this.data.length; i++) {
+            const label = this.data[i].label || "";
+            const value = this.data[i].value ? this.data[i].value / sum : 0;
+            const color = this.data[i].color || this.colors[i % this.colors.length];
+
+            let  foreground = Draw.path(
+                drawCircle(50, 50, 50, 50, this.donutFactor, deg, value),
+                color
+            );
+
+            deg += value;
+
+            this.svg.appendChild(foreground);
+
+            if (this.hover.visible) {
+                foreground.addEventListener('mousemove', evt => { this.showTooltip(true, foreground, value, label, evt) });
+                foreground.addEventListener("mouseleave", evt => { this.showTooltip(false) });
+            }
+        }
+        
+        clear(this.container);
+        this.tooltip = undefined;
+        this.container.appendChild(this.svg);
+        this.drawing = false;
+    }
+
+    /**
+     * Draws a tooltip at the horizontal center of the element
+     * @private
+     * @param {boolean} show - Whether to show or hide the tooltip
+     * @param {Object} g - the element on which the tooltip is centered
+     * @param {number} value - the value
+     * @param {number|string} title - the title of the element
+     *  @param {Object} title - the mouse event
+     */
+    showTooltip(show, g, value, title, event) {
+        this.drawing = true;
+        if (this.tooltip === undefined) {
+            this.tooltip = document.createElement('div');
+            this.tooltip.style.display = "block";
+            this.tooltip.style.position = "absolute";
+            this.tooltip.style.fontFamily = this.font;
+            this.tooltip.classList.add('time-chart-tooltip');
+            this.tooltip.appendChild(document.createElement('span'));
+            this.container.appendChild(this.tooltip);
+        }
+
+        if (!show) {
+            this.tooltip.style.visibility = "hidden";
+            return;
+        }
+
+        this.tooltip.style.top = (event.pageY - 47) + "px";
+        clear(this.tooltip);
+        this.tooltip.innerHTML = this.hover.callback(title, value);
+        this.tooltip.style.left = (event.pageX - this.tooltip.getBoundingClientRect().width / 2) + "px";
+        this.tooltip.style.visibility = "visible";
+        this.drawing = false;
+    }
+
+    /**
+     * Replaces the existing data with new data. 
+     * @param {array} [params.data] - the data to be displayed.
+     * @param {Object[]} [params.data] - the data to be displayed.
+     * @param {number} [params.data[].value] - value of the part.
+     * @param {number} [params.data[].label] - label of the part.
+     * @param {number} [params.data[].color] - color of the part.
      */
     setData(data) {
         this.data = data;
@@ -1393,5 +1576,6 @@ class Timeline {
 // the exported module properties.
 export {
     Barchart,
+    Piechart,
     Timeline
 }

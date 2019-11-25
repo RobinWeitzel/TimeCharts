@@ -164,7 +164,7 @@
             onScroll: e => console.log(e)
         }); */
 
-        const chart = new TimeCharts.Timeline("#container", {
+        /*const chart = new TimeCharts.Timeline("#container", {
             scale: {
                 from: 7 * 60,
                 to: 19 * 60,
@@ -225,7 +225,32 @@
                 visible: false
             },
             
+        });*/
+
+        const chart = new TimeCharts.Piechart("#container", { 
+            padding: {
+                top: 10,
+                left: 10,
+                right: 10,
+                bottom: 10
+            },
+            data: [
+                {
+                    value: 0.25,
+                    label: "Test"
+                },
+                {
+                    value: 0.5,
+                    label: "Test2"
+                },
+                {
+                    value: 0.25,
+                    label: "Test3"
+                }
+            ],
+            donutFactor: 0.6
         });
+
     </script>
 </body>
 
