@@ -1238,7 +1238,7 @@ class Timeline {
                     }
                 } else {
                     foreground = Draw.path(
-                        `M ${widthLeft + lineWidth * relativeStart + rx},${scaleStart + scaleHeight + i * (lineSpacing + lineHeight)} h ${(lineWidth * (relativeLength - relativeStart))} v ${lineHeight} h ${-(lineWidth * (relativeLength - relativeStart))} z`,
+                        `M ${widthLeft + lineWidth * relativeStart},${scaleStart + scaleHeight + i * (lineSpacing + lineHeight)} h ${(lineWidth * (relativeLength - relativeStart))} v ${lineHeight} h ${-(lineWidth * (relativeLength - relativeStart))} z`,
                         color
                     );
                 }
