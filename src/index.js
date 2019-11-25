@@ -891,6 +891,7 @@ class Barchart {
      * @param {number|string} title - the title of the element
      */
     showTooltip(show, g, value, title) {
+        this.drawing = false;
         if (this.tooltip === undefined) {
             this.tooltip = document.createElement('div');
             this.tooltip.style.display = "block";
@@ -911,6 +912,7 @@ class Barchart {
         this.tooltip.style.top = g.getBoundingClientRect().y - 43 + "px";
         this.tooltip.style.left = `calc(${g.getBoundingClientRect().x + g.getBoundingClientRect().width / 2 - this.tooltip.getBoundingClientRect().width / 2}px)`;
         this.tooltip.style.visibility = "visible";
+        this.drawing = true;
     }
 
     /**
@@ -963,6 +965,7 @@ class Timeline {
      * @param {Object} [params.colors] - custom colors
      * @param {string} [params.colors.background = "#E3E6E9"] - the color of the background of the bars (not the color of background of the whole chart).
      * @param {string} [params.colors.text = "black"] - the color of the text.
+     * @param {string} [params.round = true] - if the timeline is round.
      * @param {string} [params.font = 'Roboto'] - the font for all writing. Font must be imported separately.
      * @param {Object} [params.hover] - options for the hover effect.
      * @param {boolean} [params.hover.visible = true] - whether the titles should be shown on hover or not.
@@ -1015,6 +1018,7 @@ class Timeline {
                 textColor: "white",
                 textWidth: "variable"
             },
+            round: true,
             lineHeight: 25,
             distance: 'variable',
             adjustSize: false,
@@ -1035,6 +1039,7 @@ class Timeline {
         this.backgroundColor = params.colors.background;
         this.textColor = params.colors.text;
         this.drawing = false;
+        this.round = params.round;
 
         this.draw();
         if (typeof ResizeObserver === "function") {
@@ -1219,17 +1224,25 @@ class Timeline {
                 }
                 const steepness = 0.05; // The smaller, the rounder
 
-                if (width - rx * 2 < 0) { // bar to short to form circle
-                    foreground = Draw.path(
-                        `M ${widthLeft + lineWidth * relativeStart + width / 2}, ${scaleStart + scaleHeight + i * (lineSpacing + lineHeight)} c ${-(width / 2 / 0.75)} ${lineHeight * steepness}, ${-(width / 2 / 0.75)} ${lineHeight * (1 - steepness)}, 0 ${lineHeight} v ${-lineHeight} c ${width / 2 / 0.75} ${lineHeight * steepness}, ${width / 2 / 0.75} ${lineHeight * (1 - steepness)}, 0 ${lineHeight} z`,
-                        color
-                    );
+                if(this.round) {
+                    if (width - rx * 2 < 0) { // bar to short to form circle
+                        foreground = Draw.path(
+                            `M ${widthLeft + lineWidth * relativeStart + width / 2}, ${scaleStart + scaleHeight + i * (lineSpacing + lineHeight)} c ${-(width / 2 / 0.75)} ${lineHeight * steepness}, ${-(width / 2 / 0.75)} ${lineHeight * (1 - steepness)}, 0 ${lineHeight} v ${-lineHeight} c ${width / 2 / 0.75} ${lineHeight * steepness}, ${width / 2 / 0.75} ${lineHeight * (1 - steepness)}, 0 ${lineHeight} z`,
+                            color
+                        );
+                    } else {
+                        foreground = Draw.path(
+                            `M ${widthLeft + lineWidth * relativeStart + rx},${scaleStart + scaleHeight + i * (lineSpacing + lineHeight)} a ${rx},${ry} 0 0 0 0,${lineHeight} h ${(lineWidth * (relativeLength - relativeStart)) - rx * 2} a ${rx},${ry} 0 0 0 0,${-lineHeight} z`,
+                            color
+                        );
+                    }
                 } else {
                     foreground = Draw.path(
-                        `M ${widthLeft + lineWidth * relativeStart + rx},${scaleStart + scaleHeight + i * (lineSpacing + lineHeight)} a ${rx},${ry} 0 0 0 0,${lineHeight} h ${(lineWidth * (relativeLength - relativeStart)) - rx * 2} a ${rx},${ry} 0 0 0 0,${-lineHeight} z`,
+                        `M ${widthLeft + lineWidth * relativeStart + rx},${scaleStart + scaleHeight + i * (lineSpacing + lineHeight)} h ${(lineWidth * (relativeLength - relativeStart))} v ${lineHeight} h ${-(lineWidth * (relativeLength - relativeStart))} z`,
                         color
                     );
                 }
+
                 this.svg.appendChild(foreground);
 
                 if (this.hover.visible) {
@@ -1334,6 +1347,7 @@ class Timeline {
      * @param {number|string} title - the title of the element
      */
     showTooltip(show, g, start, end, title) {
+        this.drawing = false;
         if (this.tooltip === undefined) {
             this.tooltip = document.createElement('div');
             this.tooltip.style.display = "block";
@@ -1354,6 +1368,7 @@ class Timeline {
         this.tooltip.innerHTML = this.hover.callback(title, start, end);
         this.tooltip.style.left = `calc(${g.getBoundingClientRect().x + g.getBoundingClientRect().width / 2 - this.tooltip.getBoundingClientRect().width / 2}px)`;
         this.tooltip.style.visibility = "visible";
+        this.drawing = false;
     }
 
     /**

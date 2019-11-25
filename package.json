@@ -1,6 +1,6 @@
 {
   "name": "timecharts",
-  "version": "1.0.37",
+  "version": "1.0.39",
   "description": "A chart library focusing on visualizing time-related data",
   "main": "dist/TimeCharts.js",
   "unpkg": "dist/TimeCharts.min.js",
