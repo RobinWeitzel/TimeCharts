@@ -1513,7 +1513,7 @@ class Piechart {
             this.svg.appendChild(foreground);
 
             if (this.hover.visible) {
-                foreground.addEventListener('mousemove', evt => { this.showTooltip(true, foreground, value, label, evt) });
+                foreground.addEventListener('mousemove', evt => { this.showTooltip(true, foreground, this.data[i].value || 0, label, evt) });
                 foreground.addEventListener("mouseleave", evt => { this.showTooltip(false) });
             }
         }
