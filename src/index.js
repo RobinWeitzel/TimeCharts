@@ -386,7 +386,6 @@ class Draw {
         const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
         setAttributes(path, {
             d: shape,
-            "shape-rendering": "crispEdges",
             fill: color
         });
         setAttributes(path, options || {});
@@ -641,7 +640,8 @@ class Barchart {
 
             const background = Draw.path(
                 `M ${(this.scale.visible ? 30 : 0) + (i + 0.5) * barSpacing + i * barWidth},${0} m 0, ${barHeight - ry} a ${rx},${ry} 0 0 0 ${barWidth},0 v ${ry * 2 - barHeight} a ${rx},${ry} 0 0 0 ${-barWidth},0 z`,
-                this.backgroundColor
+                this.backgroundColor,
+                {"shape-rendering": "crispEdges"}
             );
             this.dataContainer.appendChild(background);
 
@@ -669,7 +669,8 @@ class Barchart {
                 if(height > 0 && y < barHeight) {
                     const foreground = Draw.path(
                         createVerticalBar((this.scale.visible ? 30 : 0) + (i + 0.5) * barSpacing + i * barWidth, barHeight, rx, ry, height, y, barHeight),
-                        color
+                        color,
+                        {"shape-rendering": "crispEdges"}
                     );
 
                     if (this.hover.visible) {
@@ -796,7 +797,8 @@ class Barchart {
 
             const background = Draw.path(
                 `M ${textWidth + rx}, ${(this.scale.visible ? 30 : 0) + (i + 0.5) * barSpacing + i * barHeight} a ${rx},${ry} 0 0 0 0,${barHeight} h ${barWidth - rx * 2} a ${rx},${ry} 0 0 0 0,${-barHeight} z`,
-                this.backgroundColor
+                this.backgroundColor,
+                {"shape-rendering": "crispEdges"}
             );
             this.dataContainer.appendChild(background);
 
@@ -824,7 +826,8 @@ class Barchart {
                 if(width > 0 && x < barWidth) {
                     const foreground = Draw.path(
                         createHorizontalBar(textWidth, (this.scale.visible ? 30 : 0) + (i + 0.5) * barSpacing + i * barHeight, rx, ry, width, x, barWidth),
-                        color
+                        color,
+                        {"shape-rendering": "crispEdges"}
                     );
 
                     if (this.hover.visible) {
