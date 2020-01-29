@@ -386,6 +386,7 @@ class Draw {
         const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
         setAttributes(path, {
             d: shape,
+            "shape-rendering": "crispEdges",
             fill: color
         });
         setAttributes(path, options || {});
@@ -736,7 +737,7 @@ class Barchart {
         const realWidth = this.container.clientWidth - this.padding.right - this.padding.left;
         const viewboxWidthScale = 100 / realWidth;
         const barCount = this.data.length;
-        const textWidth = this.data.reduce((p, c) => Math.max(p, c.label !== undefined && c.label.length > 0 ? (2 + c.label.length * 7.5) * viewboxWidthScale : 0), 0); // 7.5 per char 
+        const textWidth = this.data.reduce((p, c) => Math.max(p, c.label !== undefined && c.label.length > 0 ? (20 + c.label.length * 7.5) * viewboxWidthScale : 0), 0); // 7.5 per char 
         const barWidth = 100 - textWidth;
         const barHeight = this.barSize;
 
